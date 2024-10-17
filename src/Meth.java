@@ -1,7 +1,5 @@
 public class Meth
 {
-    final static double DEG2RAD = Math.PI / 180.0;
-
     public static Mat4 scale(Vec3 s)
     {
         return new Mat4(new double[] {
@@ -14,7 +12,7 @@ public class Meth
 
     public static Mat4 rotateX(double angle)
     {
-        angle *= DEG2RAD;
+        angle = Math.toRadians(angle);
         double sin = Math.sin(angle);
         double cos = Math.cos(angle);
 
@@ -27,7 +25,7 @@ public class Meth
     }
     public static Mat4 rotateY(double angle)
     {
-        angle *= DEG2RAD;
+        angle = Math.toRadians(angle);
         double sin = Math.sin(angle);
         double cos = Math.cos(angle);
 
@@ -40,7 +38,7 @@ public class Meth
     }
     public static Mat4 rotateZ(double angle)
     {
-        angle *= DEG2RAD;
+        angle = Math.toRadians(angle);
         double sin = Math.sin(angle);
         double cos = Math.cos(angle);
 
@@ -55,7 +53,7 @@ public class Meth
     public static Mat4 rotate(Vec3 axis, double angle)
     {
         axis = axis.normalize();
-        angle *= DEG2RAD;
+        angle = Math.toRadians(angle);
         double sin = Math.sin(angle);
         double cos = Math.cos(angle);
         double omcos = 1.0 - cos;
@@ -80,7 +78,7 @@ public class Meth
 
     public static Mat4 perspective(double fovY, double aspect, double near, double far) //TODO: fix this
     {
-        double cot = 1.0 / Math.tan(fovY / 2 * DEG2RAD);
+        double cot = 1.0 / Math.tan(Math.toRadians(fovY / 2));
         return new Mat4(new double[] {
                 cot / aspect, 0.0,  0.0,                              0.0,
                 0.0,          cot,  0.0,                              0.0,

@@ -30,18 +30,6 @@ public class Mat4
 
     public Mat4 mul(Mat4 other)
     {
-//        Mat4 res = new Mat4();
-//        for (int i = 0; i < 16; i += 4)
-//        {
-//            for (int j = 0; j < 4; j++)
-//            {
-//                res.data[i + j] = 0.0;
-//                for (int k = 0; k < 4; k++)
-//                    res.data[i + j] += data[i + k] * other.data[k * 4 + j];
-//            }
-//        }
-//        return res;
-
         Mat4 res = new Mat4(0.0);
         for (int i = 0; i < 4; i++) // row
             for (int j = 0; j < 4; j++) // column

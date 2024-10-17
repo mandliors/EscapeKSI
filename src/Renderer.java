@@ -4,20 +4,21 @@ import java.util.List;
 
 public class Renderer
 {
-    private int width;
-    private int height;
+    private int width, height;
+    private Graphics2D g2d;
 
     private Mat4 projection;
 
     private static final List<Trigon> trigons = new ArrayList<Trigon>();
 
-    public Renderer(int width, int height)
+    public Renderer(int width, int height, Graphics2D g2d)
     {
         this.width = width;
         this.height = height;
+        this.g2d = g2d;
 
         projection = Meth.perspective(45.0, (double)width / height, 0.1, 100.0);
-        //projection = Meth.orthographic(-10,10,10,-10,0,10);
+        //projection = Meth.orthographic(-10, 10, 10, -10, 0, 10);
     }
 
     public void submitTrigon(Trigon trigon)
@@ -25,11 +26,12 @@ public class Renderer
         trigons.add(trigon);
     }
 
-    public void renderTrigons(Graphics g, Mat4 view)
+    public void render(Mat4 view)
     {
-        Graphics2D g2d = (Graphics2D)g;
-        g2d.translate(width / 2, height / 2);
+        g2d.setColor(new Color(40, 40, 40));
+        g2d.fillRect(0, 0, width, height);
 
+        g2d.translate(width / 2, height / 2);
         for (Trigon t : trigons)
         {
             //proj * view * model * pos
@@ -42,7 +44,6 @@ public class Renderer
                 points[i].setZ(points[i].getZ() / points[i].getW());
             }
 
-
             double scaleH = width / 2.0;
             double scaleV = height / 2.0;
             g2d.setColor(t.getColor());
@@ -51,5 +52,6 @@ public class Renderer
                     new int[]{(int) (points[0].getY() * scaleV), (int) (points[1].getY() * scaleV), (int) (points[2].getY() * scaleV) }, 3
             );
         }
+        g2d.translate(-width / 2, -height / 2);
     }
 }
