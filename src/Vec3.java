@@ -1,8 +1,6 @@
 public class Vec3
 {
-    private double x;
-    private double y;
-    private double z;
+    private double x, y, z;
 
     public Vec3(double x, double y, double z)
     {
@@ -26,6 +24,7 @@ public class Vec3
     public Vec3 sub(Vec3 other) { return add(other.neg()); }
     public Vec3 neg() { return mul(-1); }
     public Vec3 mul(double scalar) { return new Vec3(x * scalar, y * scalar, z * scalar); }
+    public Vec3 normalize() { double length = getLength(); return new Vec3(x / length, y / length, z / length); }
 
     public double dot(Vec3 other) { return x * other.getX() + y * other.getY() + z * other.getZ(); }
     public Vec3 cross(Vec3 other) { return new Vec3(y * other.getZ() - z * other.getY(), z * other.getX() - x * other.getZ(), x * other.getY() - y * other.getX()); }
