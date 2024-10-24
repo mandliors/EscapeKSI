@@ -1,56 +1,56 @@
 public class Meth
 {
-    public static Mat4 scale(Vec3 s)
+    public static Mat4 scale(Mat4 mat, Vec3 s)
     {
-        return new Mat4(new double[] {
+        return mat.multiply(new Mat4(new double[] {
                 s.getX(), 0.0,      0.0,      0.0,
                 0.0,      s.getY(), 0.0,      0.0,
                 0.0,      0.0,      s.getZ(), 0.0,
                 0.0,      0.0,      0.0,      1.0
-        });
+        }));
     }
 
-    public static Mat4 rotateX(double angle)
+    public static Mat4 rotateX(Mat4 mat, double angle)
     {
         angle = Math.toRadians(angle);
         double sin = Math.sin(angle);
         double cos = Math.cos(angle);
 
-        return new Mat4(new double[] {
+        return mat.multiply(new Mat4(new double[] {
                 1.0, 0.0,  0.0, 0.0,
                 0.0, cos, -sin, 0.0,
                 0.0, sin,  cos, 0.0,
                 0.0, 0.0,  0.0, 1.0
-        });
+        }));
     }
-    public static Mat4 rotateY(double angle)
+    public static Mat4 rotateY(Mat4 mat, double angle)
     {
         angle = Math.toRadians(angle);
         double sin = Math.sin(angle);
         double cos = Math.cos(angle);
 
-        return new Mat4(new double[] {
+        return mat.multiply(new Mat4(new double[] {
                  cos, 0.0, sin, 0.0,
                  0.0, 1.0, 0.0, 0.0,
                 -sin, 0.0, cos, 0.0,
                  0.0, 0.0, 0.0, 1.0
-        });
+        }));
     }
-    public static Mat4 rotateZ(double angle)
+    public static Mat4 rotateZ(Mat4 mat, double angle)
     {
         angle = Math.toRadians(angle);
         double sin = Math.sin(angle);
         double cos = Math.cos(angle);
 
-        return new Mat4(new double[] {
+        return mat.multiply(new Mat4(new double[] {
                 cos, -sin, 0.0, 0.0,
                 sin,  cos, 0.0, 0.0,
                 0.0,  0.0, 1.0, 0.0,
                 0.0,  0.0, 0.0, 1.0
-        });
+        }));
     }
 
-    public static Mat4 rotate(Vec3 axis, double angle)
+    public static Mat4 rotate(Mat4 mat, Vec3 axis, double angle)
     {
         axis = axis.normalize();
         angle = Math.toRadians(angle);
@@ -58,25 +58,25 @@ public class Meth
         double cos = Math.cos(angle);
         double omcos = 1.0 - cos;
 
-        return new Mat4(new double[] {
+        return mat.multiply(new Mat4(new double[] {
                 cos + Math.pow(axis.getX(), 2) * omcos, axis.getX() * axis.getY() * omcos - axis.getZ() * sin, axis.getX() * axis.getZ() * omcos + axis.getY() * sin, 0.0,
                 axis.getY() * axis.getX() * omcos + axis.getZ() * sin, cos + Math.pow(axis.getY(), 2) * omcos, axis.getY() * axis.getZ() * omcos - axis.getX() * sin, 0.0,
                 axis.getZ() * axis.getX() * omcos - axis.getY() * sin, axis.getZ() * axis.getY() * omcos + axis.getX() * sin, cos + Math.pow(axis.getZ(), 2) * omcos, 0.0,
                 0.0, 0.0, 0.0, 1.0
-        });
+        }));
     }
 
-    public static Mat4 translate(Vec3 t)
+    public static Mat4 translate(Mat4 mat, Vec3 t)
     {
-        return new Mat4(new double[] {
+        return mat.multiply(new Mat4(new double[] {
                 1.0, 0.0, 0.0, t.getX(),
                 0.0, 1.0, 0.0, t.getY(),
                 0.0, 0.0, 1.0, t.getZ(),
                 0.0, 0.0, 0.0, 1.0
-        });
+        }));
     }
 
-    public static Mat4 perspective(double fovY, double aspect, double near, double far) //TODO: fix this
+    public static Mat4 perspective(double fovY, double aspect, double near, double far)
     {
         double cot = 1.0 / Math.tan(Math.toRadians(fovY / 2));
         return new Mat4(new double[] {
@@ -94,5 +94,35 @@ public class Meth
                 0.0,                  0.0,                  -2.0 / (far - near), -(far + near) / (far - near),
                 0.0,                  0.0,                   0.0,                 1.0
         });
+    }
+
+    public static Mat4 lookAt(Vec3 position, Vec3 direction, Vec3 up)
+    {
+        // calculate the view space basis vectors
+        direction = direction.normalize();
+        Vec3 right = direction.cross(up).normalize();
+        up = up.normalize();
+        //up = right.cross(direction).normalize();
+        //direction = direction.negate();
+
+        //TODO: fix z movement direction
+
+        /*
+           basis transformation from world->view is done using the inverse of the view->world matrix
+           the view->world matrix is (b1|b2|b3|e4) where bi-s are the basis vectors, e4 is (0,0,0,1)
+           to get world->view from view->world, we just have to get the inverse, which is just the
+           transpose of the matrix, because it is orthonormal (columns are orthogonal and normalized)
+        */
+        Mat4 worldToView = new Mat4(new double[] {
+                right.getX(),     right.getY(),     right.getZ(),     0.0,
+                up.getX(),        up.getY(),        up.getZ(),        0.0,
+                direction.getX(), direction.getY(), direction.getZ(), 0.0,
+                0.0,              0.0,              0.0,              1.0
+        });
+
+        // translate in the opposite direction of the position
+        worldToView = Meth.translate(worldToView, new Vec3(-position.getX(), -position.getY(), -position.getZ()));
+
+        return worldToView;
     }
 }

@@ -28,7 +28,7 @@ public class Mat4
         return res;
     }
 
-    public Mat4 mul(Mat4 other)
+    public Mat4 multiply(Mat4 other)
     {
         Mat4 res = new Mat4(0.0);
         for (int i = 0; i < 4; i++) // row
@@ -38,7 +38,7 @@ public class Mat4
         return res;
     }
 
-    public Vec4 mul(Vec4 vec)
+    public Vec4 multiply(Vec4 vec)
     {
         return new Vec4(
                 data[0]  * vec.getX() + data[1]  * vec.getY() + data[2]  * vec.getZ() + data[3]  * vec.getW(),
@@ -59,10 +59,10 @@ public class Mat4
 
     public void print()
     {
-        for(int i=0;i<4;i++)
+        for (int i = 0; i < 4; i++)
         {
-            for(int j=0;j<4;j++)
-                System.out.print(data[i*4+j]+" ");
+            for(int j = 0; j < 4; j++)
+                System.out.print(data[i * 4 + j] + " ");
             System.out.println();
         }
     }

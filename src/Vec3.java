@@ -12,20 +12,28 @@ public class Vec3
     {
         this.x = this.y = this.z = v;
     }
+    public Vec3(Vec4 v)
+    {
+        this.x = v.getX();
+        this.y = v.getY();
+        this.z = v.getZ();
+    }
 
     public double getX() { return x; }
     public double getY() { return y; }
     public double getZ() { return z; }
 
-    public double getLength() { return Math.sqrt(getLengthSqr()); }
-    public double getLengthSqr() { return x * x + y * y + z * z; }
+    public double getLength() { return Math.sqrt(getLengthSquared()); }
+    public double getLengthSquared() { return x * x + y * y + z * z; }
 
     public Vec3 add(Vec3 other) { return new Vec3(x + other.getX(), y + other.getY(), z + other.getZ()); }
-    public Vec3 sub(Vec3 other) { return add(other.neg()); }
-    public Vec3 neg() { return mul(-1); }
-    public Vec3 mul(double scalar) { return new Vec3(x * scalar, y * scalar, z * scalar); }
+    public Vec3 subtract(Vec3 other) { return add(other.negate()); }
+    public Vec3 negate() { return scale(-1); }
+    public Vec3 scale(double scalar) { return new Vec3(x * scalar, y * scalar, z * scalar); }
     public Vec3 normalize() { double length = getLength(); return new Vec3(x / length, y / length, z / length); }
 
     public double dot(Vec3 other) { return x * other.getX() + y * other.getY() + z * other.getZ(); }
     public Vec3 cross(Vec3 other) { return new Vec3(y * other.getZ() - z * other.getY(), z * other.getX() - x * other.getZ(), x * other.getY() - y * other.getX()); }
+
+    public void print() { System.out.printf("%g %g %g\n", x, y, z); }
 }

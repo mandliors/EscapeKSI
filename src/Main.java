@@ -14,7 +14,7 @@ public class Main extends JFrame
     {
         setTitle("Escape KSI");
         setSize(WIDTH, HEIGHT);
-        //setResizable(false);
+        setResizable(false);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
