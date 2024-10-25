@@ -101,11 +101,8 @@ public class Meth
         // calculate the view space basis vectors
         direction = direction.normalize();
         Vec3 right = direction.cross(up).normalize();
-        up = up.normalize();
-        //up = right.cross(direction).normalize();
-        //direction = direction.negate();
-
-        //TODO: fix z movement direction
+        up = right.cross(direction).normalize();
+        direction = direction.negate();
 
         /*
            basis transformation from world->view is done using the inverse of the view->world matrix
@@ -120,8 +117,8 @@ public class Meth
                 0.0,              0.0,              0.0,              1.0
         });
 
-        // translate in the opposite direction of the position
-        worldToView = Meth.translate(worldToView, new Vec3(-position.getX(), -position.getY(), -position.getZ()));
+        // translate to the position
+        worldToView = Meth.translate(worldToView, new Vec3(position.getX(), position.getY(), position.getZ()));
 
         return worldToView;
     }

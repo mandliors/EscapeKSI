@@ -9,25 +9,25 @@ public class Tetrahedron implements Renderable
     public Tetrahedron()
     {
         this.model = new Mat4(1.0);
-        this.model = Meth.translate(model, new Vec3(0, 0, 10.2));
+        this.model = Meth.translate(model, new Vec3(0.5, 0, 10.2));
         this.model = Meth.scale(model, new Vec3(0.5));
         this.model = Meth.rotate(model, new Vec3(1, 0.2, 0.5), 45.0);
 
         this.trigons = new Trigon[] {
                 new Trigon(
-                        new Vec3(0.5, 0.5, 0.5),
-                        new Vec3(-0.5, -0.5, 0.5),
-                        new Vec3(-0.5, 0.5, -0.5)
+                        new Vec3(-0.5,  0.5, -0.5),
+                        new Vec3(-0.5, -0.5,  0.5),
+                        new Vec3( 0.5,  0.5,  0.5)
                 ),
                 new Trigon(
-                        new Vec3(0.5, 0.5, 0.5),
-                        new Vec3(-0.5, -0.5, 0.5),
-                        new Vec3(0.5, -0.5, -0.5)
+                        new Vec3( 0.5,  0.5,  0.5),
+                        new Vec3(-0.5, -0.5,  0.5),
+                        new Vec3( 0.5, -0.5, -0.5)
                 ),
                 new Trigon(
-                        new Vec3(-0.5, 0.5, -0.5),
-                        new Vec3(0.5, -0.5, -0.5),
-                        new Vec3(0.5, 0.5, 0.5)
+                        new Vec3( 0.5,  0.5,  0.5),
+                        new Vec3( 0.5, -0.5, -0.5),
+                        new Vec3(-0.5,  0.5, -0.5)
                 ),
                 new Trigon(
                         new Vec3(-0.5, 0.5, -0.5),

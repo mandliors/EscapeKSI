@@ -9,10 +9,7 @@ public class Vec4
         this.z = z;
         this.w = w;
     }
-    public Vec4(double v)
-    {
-        this.x = this.y = this.z = this.w = v;
-    }
+    public Vec4(double v) { this.x = this.y = this.z = this.w = v; }
     public Vec4(Vec3 v, double w)
     {
         this.x = v.getX();

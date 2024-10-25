@@ -8,16 +8,17 @@ public class Vec3
         this.y = y;
         this.z = z;
     }
-    public Vec3(double v)
-    {
-        this.x = this.y = this.z = v;
-    }
+    public Vec3(double v) { this.x = this.y = this.z = v; }
     public Vec3(Vec4 v)
     {
         this.x = v.getX();
         this.y = v.getY();
         this.z = v.getZ();
     }
+
+    public void setX(double x) { this.x = x; }
+    public void setY(double y) { this.y = y; }
+    public void setZ(double z) { this.z = z; }
 
     public double getX() { return x; }
     public double getY() { return y; }

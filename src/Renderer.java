@@ -43,13 +43,13 @@ public class Renderer
             Vec3 normal = points[2].xyz().subtract(points[0].xyz()).cross(points[1].xyz().subtract(points[0].xyz()));
             double dot = points[0].xyz().dot(normal);
             if (dot >= 0.0)
-                g2d.setColor(Color.RED);
-            else
-                g2d.setColor(Color.CYAN);
+                continue;
+
+            g2d.setColor(Color.CYAN);
 
             // draw normal
             Vec4 start = points[0].add(points[1]).add(points[2]).scale(1.0 / 3.0);
-            Vec4 end = start.add(new Vec4(normal.normalize().scale(0.2), 1.0));
+            Vec4 end = start.subtract(new Vec4(normal.normalize().scale(0.2), 1.0));
             start = projection.multiply(start); end = projection.multiply(end);
             start.setX(start.getX() / start.getW()); end.setX(end.getX() / end.getW());
             start.setY(start.getY() / start.getW()); end.setY(end.getY() / end.getW());

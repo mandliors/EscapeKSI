@@ -10,7 +10,7 @@ import java.util.HashMap;
 public class Game extends JComponent
 {
     private final int FPS = 60;
-    private final int FRAME_TIME = 1000000000 / FPS;
+    private final int FRAME_TIME = 1000 / FPS;
     private final double CAMERA_SPEED = 0.03;
 
     private int width, height;
@@ -35,58 +35,59 @@ public class Game extends JComponent
         camera = new Camera(45.0, (double)width / height, 0.1, 100.0);
         renderer = new Renderer(width, height, g2d);
 
-        Input input = new Input();
         requestFocus();
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                input.setKeyDown(e.getKeyCode(), true);
+                Input.setKeyDown(e.getKeyCode(), true);
             }
             @Override
             public void keyReleased(KeyEvent e) {
-                input.setKeyDown(e.getKeyCode(), false);
+                Input.setKeyDown(e.getKeyCode(), false);
             }
         });
         addMouseListener(new MouseAdapter() {
             @Override
-            public void mousePressed(MouseEvent e) {
-                input.setMouseButtonDown(e.getButton(), true);
-            }
+            public void mousePressed(MouseEvent e) { Input.setMouseButtonDown(e.getButton(), true); }
             @Override
-            public void mouseReleased(MouseEvent e) {
-                input.setMouseButtonDown(e.getButton(), false);
-            }
+            public void mouseReleased(MouseEvent e) { Input.setMouseButtonDown(e.getButton(), false); }
         });
-        new Thread(() -> {
-            while (true)
-            {
-                short dx = 0, dz = 0;
-                if (input.isKeyDown(KeyEvent.VK_W)) dz += -1;
-                if (input.isKeyDown(KeyEvent.VK_A)) dx += -1;
-                if (input.isKeyDown(KeyEvent.VK_S)) dz += 1;
-                if (input.isKeyDown(KeyEvent.VK_D)) dx += 1;
-                camera.translate(new Vec3(dx * CAMERA_SPEED, 0.0, dz * CAMERA_SPEED));
-                sleepNoThrow(5);
-            }
-        }).start();
+        addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) { Input.addMouseDelta(new Vec2(e.getX(), e.getY())); }
+        });
 
         Tetrahedron tetra = new Tetrahedron();
         Cube cube = new Cube();
 
         Thread gameThread = new Thread(() -> {
+            double dt = 0.0;
             while (true)
             {
-                long startTime = System.nanoTime();
+                long startTime = System.currentTimeMillis();
+
+                // update
+                short dx = 0, dz = 0;
+                if (input.isKeyDown(KeyEvent.VK_W)) dz += -1;
+                if (input.isKeyDown(KeyEvent.VK_A)) dx += -1;
+                if (input.isKeyDown(KeyEvent.VK_S)) dz += 1;
+                if (input.isKeyDown(KeyEvent.VK_D)) dx += 1;
+                camera.translate(new Vec2(dx * dt, dz * dt));
+                //camera.rotate(Input.getMouseDelta().scale(dt * 0.01));
 
                 tetra._rotate();
                 cube._rotate();
+
+                // render
                 renderer.add(cube);
+                renderer.add(tetra);
                 renderer.render(camera.getProjection(), camera.getView());
                 render();
 
-                long elapsedTime = System.nanoTime() - startTime;
+                long elapsedTime = System.currentTimeMillis() - startTime;
+                dt = elapsedTime / 1000.0;
                 if (elapsedTime < FRAME_TIME)
-                    sleepNoThrow((FRAME_TIME - elapsedTime) / 1000000);
+                    sleepNoThrow((FRAME_TIME - elapsedTime) / 1000);
             }
         });
         gameThread.start();

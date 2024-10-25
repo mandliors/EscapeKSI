@@ -8,21 +8,23 @@ public class Cube implements Renderable
     public Cube()
     {
         this.model = new Mat4(1.0);
-        this.model = Meth.translate(model, new Vec3(0, 0, 10.2));
+        this.model = Meth.translate(model, new Vec3(-0.5, 0, 10.2));
         this.model = Meth.scale(model, new Vec3(0.5));
         this.model = Meth.rotate(model, new Vec3(1, 0.2, 0.5), 45.0);
 
         trigons = new Trigon[]{
-                new Trigon(
-                        new Vec3(-0.5, -0.5, -0.5),
-                        new Vec3( 0.5, -0.5, -0.5),
-                        new Vec3( 0.5,  0.5, -0.5)
-                ),
+                //back face
                 new Trigon(
                         new Vec3( 0.5,  0.5, -0.5),
-                        new Vec3(-0.5,  0.5, -0.5),
+                        new Vec3( 0.5, -0.5, -0.5),
                         new Vec3(-0.5, -0.5, -0.5)
                 ),
+                new Trigon(
+                        new Vec3(-0.5, -0.5, -0.5),
+                        new Vec3(-0.5,  0.5, -0.5),
+                        new Vec3( 0.5,  0.5, -0.5)
+                ),
+                //front face
                 new Trigon(
                         new Vec3(-0.5, -0.5,  0.5),
                         new Vec3( 0.5, -0.5,  0.5),
@@ -33,6 +35,7 @@ public class Cube implements Renderable
                         new Vec3(-0.5,  0.5,  0.5),
                         new Vec3(-0.5, -0.5,  0.5)
                 ),
+                // left face
                 new Trigon(
                         new Vec3(-0.5,  0.5,  0.5),
                         new Vec3(-0.5,  0.5, -0.5),
@@ -43,17 +46,18 @@ public class Cube implements Renderable
                         new Vec3(-0.5, -0.5,  0.5),
                         new Vec3(-0.5,  0.5,  0.5)
                 ),
-
-                new Trigon(
-                        new Vec3(0.5,  0.5,  0.5),
-                        new Vec3(0.5,  0.5, -0.5),
-                        new Vec3(0.5, -0.5, -0.5)
-                ),
+                // right face
                 new Trigon(
                         new Vec3(0.5, -0.5, -0.5),
-                        new Vec3(0.5, -0.5,  0.5),
+                        new Vec3(0.5,  0.5, -0.5),
                         new Vec3(0.5,  0.5,  0.5)
                 ),
+                new Trigon(
+                        new Vec3(0.5,  0.5,  0.5),
+                        new Vec3(0.5, -0.5,  0.5),
+                        new Vec3(0.5, -0.5, -0.5)
+                ),
+                // bottom face
                 new Trigon(
                         new Vec3(-0.5, -0.5, -0.5),
                         new Vec3( 0.5, -0.5, -0.5),
@@ -64,140 +68,17 @@ public class Cube implements Renderable
                         new Vec3(-0.5, -0.5,  0.5),
                         new Vec3(-0.5, -0.5, -0.5)
                 ),
-                new Trigon(
-                        new Vec3(-0.5,  0.5, -0.5),
-                        new Vec3( 0.5,  0.5, -0.5),
-                        new Vec3( 0.5,  0.5,  0.5)
-                ),
+                // top face
                 new Trigon(
                         new Vec3( 0.5,  0.5,  0.5),
-                        new Vec3(-0.5,  0.5,  0.5),
+                        new Vec3( 0.5,  0.5, -0.5),
                         new Vec3(-0.5,  0.5, -0.5)
                 ),
-
                 new Trigon(
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0)
-                ),
-                new Trigon(
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0)
-                ),
-                new Trigon(
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0)
-                ),
-                new Trigon(
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0)
-                ),
-                new Trigon(
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0)
-                ),
-                new Trigon(
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0)
-                ),
-
-                new Trigon(
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0)
-                ),
-                new Trigon(
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0)
-                ),
-                new Trigon(
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0)
-                ),
-                new Trigon(
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0)
-                ),
-                new Trigon(
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0)
-                ),
-                new Trigon(
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0)
-                ),
-
-                new Trigon(
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0)
-                ),
-                new Trigon(
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0)
-                ),
-                new Trigon(
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0)
-                ),
-                new Trigon(
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0)
-                ),
-                new Trigon(
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0)
-                ),
-                new Trigon(
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0)
-                ),
-
-                new Trigon(
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0)
-                ),
-                new Trigon(
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0)
-                ),
-                new Trigon(
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0)
-                ),
-                new Trigon(
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0)
-                ),
-                new Trigon(
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0)
-                ),
-                new Trigon(
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0),
-                        new Vec3(0.0, 0.0, 0.0)
-                ),
+                        new Vec3(-0.5,  0.5, -0.5),
+                        new Vec3(-0.5,  0.5,  0.5),
+                        new Vec3( 0.5,  0.5,  0.5)
+                )
         };
     }
 

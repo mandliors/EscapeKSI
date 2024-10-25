@@ -28,7 +28,8 @@ public class Camera
         //this.projection = Meth.orthographic(-10, 10, 10, -10, 0, 10);
     }
 
-    public void translate(Vec3 translation) { position = position.add(translation); }
+    public void translate(Vec2 translation) { position = position.add(new Vec3(translation.getX(), 0.0, translation.getY())); }
+    public void rotate(Vec2 rotation) { yaw += rotation.getX(); pitch += rotation.getY(); }
 
     public Mat4 getProjection() { return projection; }
     public Mat4 getView()
