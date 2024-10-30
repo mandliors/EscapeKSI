@@ -7,10 +7,16 @@ public class Cube implements Renderable
 
     public Cube()
     {
+        this(new Vec3(0.0), new Vec3(1.0), new Vec3(0.0));
+    }
+    public Cube(Vec3 position, Vec3 scale, Vec3 rotation)
+    {
         this.model = new Mat4(1.0);
-        this.model = Meth.translate(model, new Vec3(-0.5, 0, 10.2));
-        this.model = Meth.scale(model, new Vec3(0.5));
-        this.model = Meth.rotate(model, new Vec3(1, 0.2, 0.5), 45.0);
+        this.model = Meth.translate(model, position);
+        this.model = Meth.scale(model, scale);
+        this.model = Meth.rotateX(model, rotation.getX()); // yaw
+        this.model = Meth.rotateY(model, rotation.getY()); // pitch
+        this.model = Meth.rotateZ(model, rotation.getZ()); // roll
 
         trigons = new Trigon[]{
                 //back face

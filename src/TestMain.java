@@ -5,8 +5,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferStrategy;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Vector;
 
-public class Main extends Canvas implements Runnable
+public class TestMain extends Canvas implements Runnable
 {
     private static final int WIDTH = 1800;
     private static final int HEIGHT = 1200;
@@ -18,10 +21,9 @@ public class Main extends Canvas implements Runnable
 
     private Camera cam;
 
-    private Tetrahedron tetra;
-    private Cube cube;
+    private List<Cube> cubes;
 
-    public Main()
+    public TestMain()
     {
         JFrame frame = new JFrame("Escape KSI");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -63,8 +65,14 @@ public class Main extends Canvas implements Runnable
             public void mouseMoved(MouseEvent e) { Input.addMouseDelta(new Vec2(e.getX(), e.getY())); }
         });
 
-        tetra = new Tetrahedron(new Vec3(0.5, 0.5, 10.2), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0));
-        cube = new Cube(new Vec3(-0.5, 0, 10.2), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0));
+        cubes = new LinkedList<>();
+        cubes.add(new Cube(new Vec3(0,0.5, -10.0), new Vec3(1.0, 1.5, 1.0), new Vec3(0.0)));
+
+//        cubes.add(new Cube(new Vec3(0,0.5, 10.0), new Vec3(2.0, 0.2, 2.0), new Vec3(0.0)));
+//        cubes.add(new Cube(new Vec3(0,-0.5, 10.0), new Vec3(2.0, 0.2, 2.0), new Vec3(0.0)));
+//        for (double x = -1.0; x < 1.1; x += 0.2)
+//            cubes.add(new Cube(new Vec3(x,0.0, 15.0), new Vec3(0.05, 0.8, 1.0), new Vec3(0.0)));
+
 
         new Thread(this).start();
     }
@@ -100,29 +108,26 @@ public class Main extends Canvas implements Runnable
         if (Input.isKeyDown(KeyEvent.VK_D)) dx += 1;
         cam.translate(new Vec2(dx * dt, dz * dt));
         //cam.rotate(Input.getMouseDelta().scale(dt * 0.1));
-
-        tetra._rotate();
-        cube._rotate();
     }
 
     private void render()
     {
         Graphics2D g2d = (Graphics2D) getBufferStrategy().getDrawGraphics();
 
-        Renderer.add(cube);
-        Renderer.add(tetra);
+        for (Cube cube : cubes)
+            Renderer.add(cube);
         Renderer.render(g2d, cam.getProjection(), cam.getView());
 
         g2d.setColor(Color.yellow);
         if (getMousePosition() != null)
-            g2d.fillOval(getMousePosition().x - 5, getMousePosition().y - 5, 10, 10);
+            g2d.fillOval(getMousePosition().x, getMousePosition().y, 10, 10);
 
         getBufferStrategy().show();
     }
 
     public static void main(String[] args)
     {
-        Main game = new Main();
+        TestMain game = new TestMain();
         game.start();
     }
 }

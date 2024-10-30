@@ -118,7 +118,7 @@ public class Meth
         });
 
         // translate to the position
-        worldToView = Meth.translate(worldToView, new Vec3(position.getX(), position.getY(), position.getZ()));
+        worldToView = Meth.translate(worldToView, position.negate());
 
         return worldToView;
     }

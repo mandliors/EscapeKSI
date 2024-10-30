@@ -21,14 +21,14 @@ public class Camera
         //this.aspectRatio = aspectRatio;
         //this.nearPlain = nearPlain;
         //this.farPlain = farPlain;
-        this.moveSpeed = 0.01;
+        this.moveSpeed = 40.0;
         this.mouseSensitivity = 0.01;
 
         this.projection = Meth.perspective(fov, aspectRatio, nearPlain, farPlain);
         //this.projection = Meth.orthographic(-10, 10, 10, -10, 0, 10);
     }
 
-    public void translate(Vec2 translation) { position = position.add(new Vec3(translation.getX(), 0.0, translation.getY())); }
+    public void translate(Vec2 translation) { position = position.add(new Vec3(translation.getX() * moveSpeed, 0.0, translation.getY() * moveSpeed)); }
     public void rotate(Vec2 rotation) { yaw += rotation.getX(); pitch += rotation.getY(); }
 
     public Mat4 getProjection() { return projection; }
