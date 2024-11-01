@@ -1,13 +1,9 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.image.BufferStrategy;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
 
 public class TestMain extends Canvas implements Runnable
 {
@@ -43,7 +39,7 @@ public class TestMain extends Canvas implements Runnable
         Renderer.init(this);
         Input.init(this);
 
-        cubes = new LinkedList<>();
+        cubes = new ArrayList<>();
         cubes.add(new Cube(new Vec3(0,-0.5, -5.0), new Vec3(1.0, 1.5, 1.0), new Vec3(0.0)));
 
         new Thread(this).start();
