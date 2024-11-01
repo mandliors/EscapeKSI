@@ -21,7 +21,7 @@ public class Camera
         //this.aspectRatio = aspectRatio;
         //this.nearPlain = nearPlain;
         //this.farPlain = farPlain;
-        this.moveSpeed = 40.0;
+        this.moveSpeed = 10.0;
         this.mouseSensitivity = 0.01;
 
         this.projection = Meth.perspective(fov, aspectRatio, nearPlain, farPlain);

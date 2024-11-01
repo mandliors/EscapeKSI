@@ -11,7 +11,7 @@ public class Renderer
     private static int width, height;
 
     // vertices are in world space (every 3 vertices form a trigon)
-    private static final List<Vec4> vertices = new LinkedList<>();
+    private static final List<Vec4> vertices = new ArrayList<>();
     private static BufferedImage ksi = null;
 
     public static void init(int width, int height)
@@ -36,6 +36,7 @@ public class Renderer
         g2d.fillRect(0, 0, width, height);
 
         g2d.translate(width / 2, height / 2);
+        g2d.scale(1.0, -1.0);
         for (int i = 0; i < vertices.size(); i += 3)
         {
             // world->view
@@ -46,11 +47,11 @@ public class Renderer
             // back-face culling
             Vec3 normal = points[2].xyz().subtract(points[0].xyz()).cross(points[1].xyz().subtract(points[0].xyz())).normalize();
             double dot = points[0].xyz().normalize().dot(normal);
-            if (dot >= 0.0)
+            if (dot <= 0.0)
                 continue;
 
             // shading
-            g2d.setColor(getShade(Color.CYAN, -dot));
+            g2d.setColor(getShade(Color.CYAN, dot));
 
             // calculuate normal
 //            Vec4 start = points[0].add(points[1]).add(points[2]).scale(1.0 / 3.0);
@@ -96,6 +97,7 @@ public class Renderer
 //            g2d.fillOval((int) (start.getX() * width / 2.0) - 5, (int) (start.getY() * height / 2.0) - 5, 10, 10);
 //            g2d.drawLine((int) (start.getX() * width / 2.0), (int) (start.getY() * height / 2.0), (int) (end.getX() * width / 2.0), (int) (end.getY() * height / 2.0));
         }
+        g2d.scale(1.0, -1.0);
         g2d.translate(-width / 2, -height / 2);
 
         vertices.clear();

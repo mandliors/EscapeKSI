@@ -40,7 +40,7 @@ public class TestMain extends Canvas implements Runnable
 
     public void start()
     {
-        cam = new Camera(45.0, (double)WIDTH / HEIGHT, 0.1, 100.0);
+        cam = new Camera(90.0, (double)WIDTH / HEIGHT, 0.1, 100.0);
         Renderer.init(WIDTH, HEIGHT);
 
         requestFocus();
@@ -66,7 +66,7 @@ public class TestMain extends Canvas implements Runnable
         });
 
         cubes = new LinkedList<>();
-        cubes.add(new Cube(new Vec3(0,0.5, -10.0), new Vec3(1.0, 1.5, 1.0), new Vec3(0.0)));
+        cubes.add(new Cube(new Vec3(0,-0.5, -5.0), new Vec3(1.0, 1.5, 1.0), new Vec3(0.0)));
 
 //        cubes.add(new Cube(new Vec3(0,0.5, 10.0), new Vec3(2.0, 0.2, 2.0), new Vec3(0.0)));
 //        cubes.add(new Cube(new Vec3(0,-0.5, 10.0), new Vec3(2.0, 0.2, 2.0), new Vec3(0.0)));
@@ -88,14 +88,7 @@ public class TestMain extends Canvas implements Runnable
             update(dt);
             render();
 
-            long elapsed = System.nanoTime() - startTime;
-            long waitTime = (FRAME_TIME - elapsed) / 1_000_000;
-            dt = elapsed / 1_000_000_000.0;
-            if (waitTime > 0)
-            {
-                try { Thread.sleep(waitTime); }
-                catch (InterruptedException e) { e.printStackTrace(); }
-            }
+            dt = (System.nanoTime() - startTime) / 1_000_000_000.0;
         }
     }
 

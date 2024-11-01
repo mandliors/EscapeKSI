@@ -63,8 +63,8 @@ public class Main extends Canvas implements Runnable
             public void mouseMoved(MouseEvent e) { Input.addMouseDelta(new Vec2(e.getX(), e.getY())); }
         });
 
-        tetra = new Tetrahedron(new Vec3(0.5, 0.5, 10.2), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0));
-        cube = new Cube(new Vec3(-0.5, 0, 10.2), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0));
+        tetra = new Tetrahedron(new Vec3(0.5, 0.5, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0));
+        cube = new Cube(new Vec3(-0.5, 0, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0));
 
         new Thread(this).start();
     }

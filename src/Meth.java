@@ -78,13 +78,24 @@ public class Meth
 
     public static Mat4 perspective(double fovY, double aspect, double near, double far)
     {
+        double t=Math.tan(Math.toRadians(fovY/2.0))*near;
+        double r=t*aspect;
+
+        return new Mat4(new double[]{
+                near/r,0,0,0,
+                0,near/t,0,0,
+                0,0,-(far+near)/(far-near),-2*far*near/(far-near),
+                0,0,-1,0
+        });
+
+        /*
         double cot = 1.0 / Math.tan(Math.toRadians(fovY / 2));
         return new Mat4(new double[] {
                 cot / aspect, 0.0,  0.0,                              0.0,
                 0.0,          cot,  0.0,                              0.0,
                 0.0,          0.0, -(far + near) / (far - near),     -1.0,
                 0.0,          0.0, -(2 * far * near) / (far - near),  0.0
-        });
+        });*/
     }
     public static Mat4 orthographic(double left, double right, double top, double bottom, double near, double far)
     {
