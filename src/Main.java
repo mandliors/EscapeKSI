@@ -32,36 +32,15 @@ public class Main extends Canvas implements Runnable
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
-        // triple buffering
+        // double buffering
         this.createBufferStrategy(2);
     }
 
     public void start()
     {
         cam = new Camera(45.0, (double)WIDTH / HEIGHT, 0.1, 100.0);
-        Renderer.init(WIDTH, HEIGHT);
-
-        requestFocus();
-        addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                Input.setKeyDown(e.getKeyCode(), true);
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {
-                Input.setKeyDown(e.getKeyCode(), false);
-            }
-        });
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) { Input.setMouseButtonDown(e.getButton(), true); }
-            @Override
-            public void mouseReleased(MouseEvent e) { Input.setMouseButtonDown(e.getButton(), false); }
-        });
-        addMouseMotionListener(new MouseAdapter() {
-            @Override
-            public void mouseMoved(MouseEvent e) { Input.addMouseDelta(new Vec2(e.getX(), e.getY())); }
-        });
+        Renderer.init(this);
+        Input.init(this);
 
         tetra = new Tetrahedron(new Vec3(0.5, 0.5, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0));
         cube = new Cube(new Vec3(-0.5, 0, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0));
@@ -77,32 +56,16 @@ public class Main extends Canvas implements Runnable
         {
             long startTime = System.nanoTime();
 
-            update(dt);
+            Input.update();
+            cam.update(dt);
+            tetra._rotate(dt);
+            cube._rotate(dt);
             render();
 
-            long elapsed = System.nanoTime() - startTime;
-            long waitTime = (FRAME_TIME - elapsed) / 1_000_000;
-            dt = elapsed / 1_000_000_000.0;
-            if (waitTime > 0)
-            {
-                try { Thread.sleep(waitTime); }
-                catch (InterruptedException e) { e.printStackTrace(); }
-            }
+            dt = (System.nanoTime() - startTime) / 1_000_000_000.0;
+
+            if (Input.isKeyPressed(KeyEvent.VK_ESCAPE)) System.exit(0);
         }
-    }
-
-    private void update(double dt)
-    {
-        short dx = 0, dz = 0;
-        if (Input.isKeyDown(KeyEvent.VK_W)) dz += -1;
-        if (Input.isKeyDown(KeyEvent.VK_A)) dx += -1;
-        if (Input.isKeyDown(KeyEvent.VK_S)) dz += 1;
-        if (Input.isKeyDown(KeyEvent.VK_D)) dx += 1;
-        cam.translate(new Vec2(dx * dt, dz * dt));
-        //cam.rotate(Input.getMouseDelta().scale(dt * 0.1));
-
-        tetra._rotate();
-        cube._rotate();
     }
 
     private void render()
@@ -111,12 +74,14 @@ public class Main extends Canvas implements Runnable
 
         Renderer.add(cube);
         Renderer.add(tetra);
-        Renderer.render(g2d, cam.getProjection(), cam.getView());
+        Renderer.render(cam);
 
         g2d.setColor(Color.yellow);
-        if (getMousePosition() != null)
-            g2d.fillOval(getMousePosition().x - 5, getMousePosition().y - 5, 10, 10);
+        Point mousePos = getMousePosition();
+        if (mousePos != null)
+            g2d.fillOval(mousePos.x - 5, mousePos.y - 5, 10, 10);
 
+        g2d.dispose();
         getBufferStrategy().show();
     }
 

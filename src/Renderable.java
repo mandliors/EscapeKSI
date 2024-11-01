@@ -1,5 +1,5 @@
 public interface Renderable
 {
-    public Trigon[] getTrigons();
+    public double[] getVertices();
     public Mat4 getModel();
 }
