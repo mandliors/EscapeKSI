@@ -17,7 +17,7 @@ public class Renderer
     private static BufferedImage ksi = null;
 
     // framebuffer for the textures
-    private static final double FRAMEBUFFER_SCALE = 0.2;
+    private static final double FRAMEBUFFER_SCALE = 1.0;
     private static BufferedImage framebuffer;
 
     public static void init(Canvas canvas)
@@ -131,41 +131,110 @@ public class Renderer
 
     private static void drawTexturedTriangleToFramebuffer(BufferedImage texture, int[] xCoords, int[] yCoords, double[] u, double[] v)
     {
-        //source: chatgpt
-
-        Graphics2D g2d = (Graphics2D) canvas.getBufferStrategy().getDrawGraphics();
-        g2d.translate(width / 2, height / 2);
-        g2d.scale(1.0, -1.0);
-
-        // calculate bounding box
-        int minX = Math.min(xCoords[0], Math.min(xCoords[1], xCoords[2]));
-        int minY = Math.min(yCoords[0], Math.min(yCoords[1], yCoords[2]));
-        int maxX = Math.max(xCoords[0], Math.max(xCoords[1], xCoords[2]));
-        int maxY = Math.max(yCoords[0], Math.max(yCoords[1], yCoords[2]));
-
-        // iterate through the bounding box
-        for (int y = minY; y <= maxY; y++)
+        // sort triangles (v0 - left, v1 - middle, v2 - right), store indices for the vertices
+        int v0, v1, v2;
+        if (xCoords[0] < xCoords[1])
         {
-            for (int x = minX; x <= maxX; x++)
+            if (xCoords[0] < xCoords[2])
             {
-                // draw pixels that are inside the triangle
-                if (isInsideTriangle(x, y, xCoords, yCoords))
+                v0 = 0;
+                if (xCoords[1] < xCoords[2]) { v1 = 1; v2 = 2; }
+                else { v1 = 2; v2 = 1; }
+            }
+            else
+            {
+                v0 = 2;
+                v1 = 0;
+                v2 = 1;
+            }
+        }
+        else if (xCoords[2] < xCoords[0])
+        {
+            v2 = 0;
+            if (xCoords[1] < xCoords[2]) { v0 = 1; v1 = 2; }
+            else { v0 = 2; v1 = 1; }
+        }
+        else
+        {
+            v0 = 1;
+            v1 = 0;
+            v2 = 2;
+        }
+
+        // slopes for the sides
+        double m1 = xCoords[v1] == xCoords[v0] ? 0 :  (double)(yCoords[v1] - yCoords[v0]) / (xCoords[v1] - xCoords[v0]);
+        double m2 = xCoords[v2] == xCoords[v0] ? 0 : (double)(yCoords[v2] - yCoords[v0]) / (xCoords[v2] - xCoords[v0]);
+
+        // m1 has to be bigger
+        if (m2 > m1)
+        {
+            double tmp = m1;
+            m1 = m2;
+            m2 = tmp;
+        }
+
+        // iterate through the columns from the left until the middle
+        double y1 = yCoords[v0], y2 = yCoords[v0];
+        for (int x = xCoords[v0]; x <= xCoords[v1]; x++)
+        {
+            y1 += m1;
+            y2 += m2;
+
+            // iterate through the pixels in the column
+            for (double y = y1; y >= y2; y--)
+            {
+                double[] uv = interpolateUV(x, (int)y, xCoords, yCoords, u, v);
+
+                int texX = (int) (uv[0] * texture.getWidth());
+                int texY = (int) (uv[1] * texture.getHeight());
+                texX = Math.clamp(texX, 0, texture.getWidth() - 1);
+                texY = Math.clamp(texY, 0, texture.getHeight() - 1);
+
+                int fbX = (int)((x + (double)width / 2) * FRAMEBUFFER_SCALE);
+                int fbY = (int)((y + (double)height / 2) * FRAMEBUFFER_SCALE);
+                if (0 <= fbX && fbX < framebuffer.getWidth() &&
+                        0 <= fbY && fbY < framebuffer.getHeight())
                 {
-                    double[] uv = interpolateUV(x, y, xCoords, yCoords, u, v);
-                    int texX = (int) (uv[0] * texture.getWidth());
-                    int texY = (int) (uv[1] * texture.getHeight());
+                    framebuffer.setRGB(fbX, fbY, texture.getRGB(texX, texY));
+                }
+            }
+        }
 
-                    texX = Math.clamp(texX, 0, texture.getWidth() - 1);
-                    texY = Math.clamp(texY, 0, texture.getHeight() - 1);
+        // slopes for the sides
+        m1 = xCoords[v1] == xCoords[v2] ? 0 : (double)(yCoords[v1] - yCoords[v2]) / (xCoords[v1] - xCoords[v2]);
+        m2 = xCoords[v0] == xCoords[v2] ? 0 : (double)(yCoords[v0] - yCoords[v2]) / (xCoords[v0] - xCoords[v2]);
 
-                    int framebufferX = (int)((x + width / 2) * FRAMEBUFFER_SCALE);
-                    int framebufferY = (int)((y + height / 2) * FRAMEBUFFER_SCALE);
-                    if (0 <= framebufferX && framebufferX < framebuffer.getWidth() &&
-                        0 <= framebufferY && framebufferY < framebuffer.getHeight())
-                    {
-                        framebuffer.setRGB(framebufferX, framebufferY, texture.getRGB(texX, texY));
-                        //System.out.printf("%d %d, %d %d", framebuffer.getWidth(), framebuffer.getHeight(), framebufferX, framebufferY);
-                    }
+        // m1 has to be smaller
+        if (m2 < m1)
+        {
+            double tmp = m1;
+            m1 = m2;
+            m2 = tmp;
+        }
+
+        // iterate through the columns from the right until the middle
+        y1 = yCoords[v2]; y2 = yCoords[v2];
+        for (int x = xCoords[v2]; x > xCoords[v1]; x--)
+        {
+            y1 -= m1;
+            y2 -= m2;
+
+            // iterate through the pixels in the column
+            for (double y = y1; y >= y2; y--)
+            {
+                double[] uv = interpolateUV(x, (int)y, xCoords, yCoords, u, v);
+
+                int texX = (int) (uv[0] * texture.getWidth());
+                int texY = (int) (uv[1] * texture.getHeight());
+                texX = Math.clamp(texX, 0, texture.getWidth() - 1);
+                texY = Math.clamp(texY, 0, texture.getHeight() - 1);
+
+                int fbX = (int)((x + (double)width / 2) * FRAMEBUFFER_SCALE);
+                int fbY = (int)((y + (double)height / 2) * FRAMEBUFFER_SCALE);
+                if (0 <= fbX && fbX < framebuffer.getWidth() &&
+                        0 <= fbY && fbY < framebuffer.getHeight())
+                {
+                    framebuffer.setRGB(fbX, fbY, texture.getRGB(texX, texY));
                 }
             }
         }
