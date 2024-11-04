@@ -25,8 +25,8 @@ public class Camera
         this.right = new Vec3(1.0, 0.0, 0.0);
         this.up = new Vec3(0.0, 1.0, 0.0);
         this.yaw = this.pitch = 0.0;
-        this.moveSpeed = 10.0;
-        this.mouseSensitivity = 0.01;
+        this.moveSpeed = 2.0;
+        this.mouseSensitivity = 0.05;
         this.projection = Meth.perspective(fov, aspectRatio, nearPlain, farPlain);
         //this.projection = Meth.orthographic(-10, 10, 10, -10, 0, 10);
 
@@ -38,11 +38,12 @@ public class Camera
     public void update(double dt)
     {
         short dx = 0, dz = 0;
-        if (Input.isKeyDown(KeyEvent.VK_W)) dz += -1;
+        if (Input.isKeyDown(KeyEvent.VK_W)) dz +=  1;
         if (Input.isKeyDown(KeyEvent.VK_A)) dx += -1;
-        if (Input.isKeyDown(KeyEvent.VK_S)) dz += 1;
-        if (Input.isKeyDown(KeyEvent.VK_D)) dx += 1;
-        translate(new Vec2(dx * dt, dz * dt));
+        if (Input.isKeyDown(KeyEvent.VK_S)) dz += -1;
+        if (Input.isKeyDown(KeyEvent.VK_D)) dx +=  1;
+        position = position.add(front.scale(dz * moveSpeed * dt));
+        position = position.add(right.scale(dx * moveSpeed * dt));
 
         Point mousePos = Input.getMousePosition();
         // mouse is on the screen
@@ -52,7 +53,7 @@ public class Camera
             if (lockMouse)
                 mouseBot.mouseMove(canvas.getLocationOnScreen().x + canvas.getWidth() / 2 ,canvas.getLocationOnScreen().y + canvas.getHeight() / 2);
             previousMousePosition = mousePos;
-            rotate(new Vec2(mouseDelta.x, mouseDelta.y).scale(-0.05));
+            rotate(new Vec2(mouseDelta.x, mouseDelta.y).scale(-mouseSensitivity));
         }
     }
 
