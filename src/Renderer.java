@@ -1,8 +1,7 @@
 import javax.imageio.ImageIO;
-import javax.xml.crypto.dsig.Transform;
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -17,6 +16,10 @@ public class Renderer
     private static final List<Renderable> objects = new ArrayList<>();
     private static BufferedImage ksi = null;
 
+    // framebuffer for the textures
+    private static final double FRAMEBUFFER_SCALE = 0.2;
+    private static BufferedImage framebuffer;
+
     public static void init(Canvas canvas)
     {
         try { ksi = ImageIO.read(new File("res/ksi.png")); }
@@ -26,6 +29,8 @@ public class Renderer
 
         Renderer.width = canvas.getWidth();
         Renderer.height = canvas.getHeight();
+
+        Renderer.framebuffer = new BufferedImage((int)(width * FRAMEBUFFER_SCALE), (int)(height * FRAMEBUFFER_SCALE), BufferedImage.TYPE_INT_ARGB);
     }
 
     public static void add(Renderable obj)
@@ -96,13 +101,13 @@ public class Renderer
                 {
                     double[] u = new double[] { 0.0, 1.0, 1.0 };
                     double[] v = new double[] { 1.0, 1.0, 0.0 };
-                    drawTexturedTriangle(ksi, xCoords, yCoords, u, v);
+                    drawTexturedTriangleToFramebuffer(ksi, xCoords, yCoords, u, v);
                 }
                 else if (i == 36)
                 {
                     double[] u = new double[] { 1.0, 0.0, 0.0 };
                     double[] v = new double[] { 0.0, 0.0, 1.0 };
-                    drawTexturedTriangle(ksi, xCoords, yCoords, u, v);
+                    drawTexturedTriangleToFramebuffer(ksi, xCoords, yCoords, u, v);
                 }
                 else
                     g2d.fillPolygon(xCoords, yCoords, 3);
@@ -113,11 +118,18 @@ public class Renderer
 //                g2d.drawLine((int) (start.getX() * width / 2.0), (int) (start.getY() * height / 2.0), (int) (end.getX() * width / 2.0), (int) (end.getY() * height / 2.0));
             }
         }
+        g2d.translate(-width / 2, -height / 2);
+        g2d.drawImage(framebuffer, 0, 0, width, height, null);
 
+        // clear the framebuffer
+        int[] pixels = ((DataBufferInt) framebuffer.getRaster().getDataBuffer()).getData();
+        Arrays.fill(pixels, 0);
+
+        // remove all objects
         objects.clear();
     }
 
-    private static void drawTexturedTriangle(BufferedImage texture, int[] xCoords, int[] yCoords, double[] u, double[] v)
+    private static void drawTexturedTriangleToFramebuffer(BufferedImage texture, int[] xCoords, int[] yCoords, double[] u, double[] v)
     {
         //source: chatgpt
 
@@ -146,9 +158,14 @@ public class Renderer
                     texX = Math.clamp(texX, 0, texture.getWidth() - 1);
                     texY = Math.clamp(texY, 0, texture.getHeight() - 1);
 
-                    int color = texture.getRGB(texX, texY);
-                    g2d.setColor(new Color(color));
-                    g2d.drawLine(x, y, x, y);
+                    int framebufferX = (int)((x + width / 2) * FRAMEBUFFER_SCALE);
+                    int framebufferY = (int)((y + height / 2) * FRAMEBUFFER_SCALE);
+                    if (0 <= framebufferX && framebufferX < framebuffer.getWidth() &&
+                        0 <= framebufferY && framebufferY < framebuffer.getHeight())
+                    {
+                        framebuffer.setRGB(framebufferX, framebufferY, texture.getRGB(texX, texY));
+                        //System.out.printf("%d %d, %d %d", framebuffer.getWidth(), framebuffer.getHeight(), framebufferX, framebufferY);
+                    }
                 }
             }
         }

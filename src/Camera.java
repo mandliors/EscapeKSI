@@ -1,3 +1,4 @@
+import java.awt.*;
 import java.awt.event.KeyEvent;
 
 public class Camera
@@ -5,11 +6,16 @@ public class Camera
     private Vec3 position, worldUp;
     private Vec3 front, right, up;
     private double yaw, pitch;
-    //private double fov, aspectRatio;
-    //private double nearPlain, farPlain;
     private double moveSpeed, mouseSensitivity;
 
     private Mat4 projection, view;
+
+    private Point previousMousePosition;
+
+    // needed for locking the mouse
+    private Robot mouseBot;
+    private Canvas canvas;
+    private boolean lockMouse;
 
     public Camera(double fov, double aspectRatio, double nearPlain, double farPlain)
     {
@@ -23,6 +29,10 @@ public class Camera
         this.mouseSensitivity = 0.01;
         this.projection = Meth.perspective(fov, aspectRatio, nearPlain, farPlain);
         //this.projection = Meth.orthographic(-10, 10, 10, -10, 0, 10);
+
+        this.previousMousePosition = new Point(0, 0);
+        try { mouseBot = new Robot(); } catch (Exception e) { e.printStackTrace(); }
+        this.lockMouse = false;
     }
 
     public void update(double dt)
@@ -33,11 +43,23 @@ public class Camera
         if (Input.isKeyDown(KeyEvent.VK_S)) dz += 1;
         if (Input.isKeyDown(KeyEvent.VK_D)) dx += 1;
         translate(new Vec2(dx * dt, dz * dt));
-        //rotate(Input.getMouseDelta().scale(-dt * 20));
+
+        Point mousePos = Input.getMousePosition();
+        // mouse is on the screen
+        if (mousePos != null)
+        {
+            Point mouseDelta = new Point(mousePos.x - previousMousePosition.x, mousePos.y - previousMousePosition.y);
+            if (lockMouse)
+                mouseBot.mouseMove(canvas.getLocationOnScreen().x + canvas.getWidth() / 2 ,canvas.getLocationOnScreen().y + canvas.getHeight() / 2);
+            previousMousePosition = mousePos;
+            rotate(new Vec2(mouseDelta.x, mouseDelta.y).scale(-0.05));
+        }
     }
 
     public void translate(Vec2 translation) { position = position.add(new Vec3(translation.getX() * moveSpeed, 0.0, translation.getY() * moveSpeed)); }
-    public void rotate(Vec2 rotation) { yaw += rotation.getX(); pitch += rotation.getY(); }
+    public void rotate(Vec2 rotation) { yaw += rotation.getX(); yaw %= 360.0; pitch = Math.clamp(pitch + rotation.getY(), -90.0, 90.0); }
+
+    public void setMouseLock(Canvas canvas, boolean lockMouse) { this.canvas = canvas; this.lockMouse = lockMouse; }
 
     public Vec3 getPosition() { return position; }
     public Mat4 getProjection() { return projection; }

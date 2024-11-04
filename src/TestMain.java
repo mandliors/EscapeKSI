@@ -36,6 +36,7 @@ public class TestMain extends Canvas implements Runnable
     public void start()
     {
         cam = new Camera(45.0, (double)WIDTH / HEIGHT, 0.1, 100.0);
+        cam.setMouseLock(this, true);
         Renderer.init(this);
         Input.init(this);
 

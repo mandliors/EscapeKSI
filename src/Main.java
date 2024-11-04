@@ -37,6 +37,7 @@ public class Main extends Canvas implements Runnable
         cam = new Camera(45.0, (double)WIDTH / HEIGHT, 0.1, 100.0);
         Renderer.init(this);
         Input.init(this);
+        //cam.setMouseLock(this, true);
 
         tetra = new Tetrahedron(new Vec3(0.5, 0.5, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0));
         cube = new Cube(new Vec3(-0.5, 0, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0));
@@ -47,6 +48,8 @@ public class Main extends Canvas implements Runnable
     @Override
     public void run()
     {
+        Font bigFont = new Font("Monospaced", Font.BOLD, 40);
+
         double dt = 0.0;
         while (!windowShouldClose)
         {
@@ -59,6 +62,11 @@ public class Main extends Canvas implements Runnable
             render();
 
             dt = (System.nanoTime() - startTime) / 1_000_000_000.0;
+
+            Graphics2D g2d = (Graphics2D) getGraphics();
+            g2d.setColor(Color.GREEN);
+            g2d.setFont(bigFont);
+            g2d.drawString(String.format("%d FPS", (int)(1 / dt)), 10, 50);
 
             if (Input.isKeyPressed(KeyEvent.VK_ESCAPE)) System.exit(0);
         }
