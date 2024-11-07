@@ -39,16 +39,16 @@ public class Main extends Canvas implements Runnable
         cam = new Camera(45.0, (double)WIDTH / HEIGHT, 0.1, 100.0);
         Renderer.init(this);
         Input.init(this);
-        //cam.setMouseLock(true);
+        cam.setMouseLock(true);
 
         tetra = new Tetrahedron(new Vec3(0.5, 0.5, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.CYAN);
         cube = new Cube(new Vec3(-0.5, 0, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE);
         cube2 = new Cube(new Vec3(-0.1, -0.4, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE);
-        Renderer.add(new Cube(new Vec3(-0.2, 0.1, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE));
-        Renderer.add(new Cube(new Vec3( 0.4, 0.4, -6.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE));
-        Renderer.add(new Cube(new Vec3(-0.4, 0.2, -7.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE));
-        Renderer.add(new Cube(new Vec3( 0.8, -0.5, -4.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE));
-        Renderer.add(new Cube(new Vec3( 0.6, -0.1, -3.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE));
+        Renderer.addRenderable(new Cube(new Vec3(-0.2, 0.1, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE));
+        Renderer.addRenderable(new Cube(new Vec3( 0.4, 0.4, -6.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE));
+        Renderer.addRenderable(new Cube(new Vec3(-0.4, 0.2, -7.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE));
+        Renderer.addRenderable(new Cube(new Vec3( 0.8, -0.5, -4.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE));
+        Renderer.addRenderable(new Cube(new Vec3( 0.6, -0.1, -3.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE));
 
         new Thread(this).start();
     }
@@ -57,9 +57,9 @@ public class Main extends Canvas implements Runnable
     public void run()
     {
         Font bigFont = new Font("Monospaced", Font.BOLD, 40);
-        Renderer.add(cube);
-        Renderer.add(cube2);
-        Renderer.add(tetra);
+        Renderer.addRenderable(cube);
+        Renderer.addRenderable(cube2);
+        Renderer.addRenderable(tetra);
 
         double dt = 0.0;
         while (!windowShouldClose)

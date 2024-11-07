@@ -1,5 +1,6 @@
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
@@ -35,18 +36,27 @@ public class Renderer
         Renderer.framebuffer = new BufferedImage((int)(width * FRAMEBUFFER_SCALE), (int)(height * FRAMEBUFFER_SCALE), BufferedImage.TYPE_INT_ARGB);
     }
 
-    public static void add(Renderable obj)
+    public static void addRenderable(Renderable obj)
     {
         objects.add(obj);
     }
+    public static void removeRenderable(Renderable obj) { objects.remove(obj); }
+    public static void clearRenderables() { objects.clear(); }
 
     public static void render(Camera camera)
     {
         BufferStrategy bufferStrategy = canvas.getBufferStrategy();
         g2d = (Graphics2D) bufferStrategy.getDrawGraphics();
 
-        g2d.setColor(new Color(40, 40, 40));
+        g2d.setColor(new Color(0, 0, 0));
         g2d.fillRect(0, 0, width, height);
+
+        AffineTransform transform = new AffineTransform();
+        transform.shear(Math.cos(System.currentTimeMillis() / 179.3), Math.sin(System.currentTimeMillis() / 1311.0));
+        transform.scale(width / (double)ksi.getWidth(), (double)height / ksi.getHeight());
+        transform.translate(100 -(int)(Math.pow(Math.sin(System.currentTimeMillis() / 1000.0),2.0) * 300), 0);
+        g2d.drawImage(ksi, transform, null);
+
 
         g2d.translate(width / 2, height / 2);
         g2d.scale(1.0, -1.0);

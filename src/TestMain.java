@@ -2,7 +2,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 public class TestMain extends Canvas implements Runnable
@@ -69,7 +68,7 @@ public class TestMain extends Canvas implements Runnable
         Graphics2D g2d = (Graphics2D) getBufferStrategy().getDrawGraphics();
 
         for (Cube cube : cubes)
-            Renderer.add(cube);
+            Renderer.addRenderable(cube);
         Renderer.render(cam);
 
         g2d.setColor(Color.yellow);

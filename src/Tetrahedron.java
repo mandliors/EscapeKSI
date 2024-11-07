@@ -2,8 +2,18 @@ import java.awt.*;
 
 public class Tetrahedron extends Renderable
 {
-    private double[] vertices;
-    private short[] indices;
+    private static double[] vertices = new double[] {
+            -0.5,  0.5, -0.5, // 0. top    left  back
+            -0.5, -0.5,  0.5, // 1. bottom left  front
+            0.5,  0.5,  0.5, // 2. top    right front
+            0.5, -0.5, -0.5  // 3. bottom right back
+    };
+    private short[] indices = new short[] {
+            0, 1, 2,
+            2, 1, 3,
+            2, 3, 0,
+            0, 3, 1
+    };
 
     Color color;
 
@@ -18,44 +28,25 @@ public class Tetrahedron extends Renderable
         rotate(rotation);
 
         this.color = color;
-
-        this.vertices = new double[] {
-                // face 1
-                -0.5,  0.5, -0.5,
-                -0.5, -0.5,  0.5,
-                 0.5,  0.5,  0.5,
-                // face 2
-                 0.5,  0.5,  0.5,
-                -0.5, -0.5,  0.5,
-                 0.5, -0.5, -0.5,
-                // face 3
-                 0.5,  0.5,  0.5,
-                 0.5, -0.5, -0.5,
-                -0.5,  0.5, -0.5,
-                // face 4
-                -0.5,  0.5, -0.5,
-                 0.5, -0.5, -0.5,
-                -0.5, -0.5,  0.5
-        };
     }
 
     public void render(Camera camera)
     {
         Mat4 viewProj = camera.getProjectionMatrix().multiply(camera.getViewMatrix());
 
-        for (int i = 0; i < vertices.length; i += 9)
+        for (int i = 0; i < indices.length; i += 3)
         {
             // model->world
             Vec4[] points = new Vec4[3];
             for (int j = 0; j < 3; j++)
             {
                 Vec4 vertex = new Vec4(0.0);
-                vertex.setX(vertices[j * 3 + i + 0]);
-                vertex.setY(vertices[j * 3 + i + 1]);
-                vertex.setZ(vertices[j * 3 + i + 2]);
+                vertex.setX(vertices[3 * indices[i + j] + 0]);
+                vertex.setY(vertices[3 * indices[i + j] + 1]);
+                vertex.setZ(vertices[3 * indices[i + j] + 2]);
                 vertex.setW(1.0);
 
-                points[j] = model.multiply(vertex);
+                points[j] = getModelMatrix().multiply(vertex);
             }
 
             // back-face culling in world space: (vertexPos - camPos) * normal should be positive to be drawn
@@ -80,6 +71,12 @@ public class Tetrahedron extends Renderable
                 points[j].setY(points[j].getY() / points[j].getW());
                 points[j].setZ(points[j].getZ() / points[j].getW());
             }
+
+            // discard clipped vertices (triangles)
+            if (!Meth.isBetween(points[0].getX(), -1.0, 1.0) || !Meth.isBetween(points[0].getY(), -1.0, 1.0) || !Meth.isBetween(points[0].getZ(), -1.0, 1.0) ||
+                    !Meth.isBetween(points[1].getX(), -1.0, 1.0) || !Meth.isBetween(points[1].getY(), -1.0, 1.0) || !Meth.isBetween(points[1].getZ(), -1.0, 1.0) ||
+                    !Meth.isBetween(points[2].getX(), -1.0, 1.0) || !Meth.isBetween(points[2].getY(), -1.0, 1.0) || !Meth.isBetween(points[2].getZ(), -1.0, 1.0))
+                continue;
 
             // clip->screen
             double scaleH = Renderer.getWidth() / 2.0;
