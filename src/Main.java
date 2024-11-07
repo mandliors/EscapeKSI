@@ -4,8 +4,8 @@ import java.awt.event.KeyEvent;
 
 public class Main extends Canvas implements Runnable
 {
-    private static final int WIDTH = 1800;
-    private static final int HEIGHT = 1200;
+    private static final int WIDTH = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
+    private static final int HEIGHT = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
 
     private static final int FPS = 60;
     private static final int FRAME_TIME = 1_000_000_000 / FPS;
@@ -22,9 +22,10 @@ public class Main extends Canvas implements Runnable
         JFrame frame = new JFrame("Escape KSI");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.add(this);
         frame.pack();
-        frame.setSize(WIDTH, HEIGHT);
+        //frame.setSize(WIDTH, HEIGHT);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
@@ -37,7 +38,7 @@ public class Main extends Canvas implements Runnable
         cam = new Camera(45.0, (double)WIDTH / HEIGHT, 0.1, 100.0);
         Renderer.init(this);
         Input.init(this);
-        //cam.setMouseLock(this, true);
+        //cam.setMouseLock(true);
 
         tetra = new Tetrahedron(new Vec3(0.5, 0.5, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0));
         cube = new Cube(new Vec3(-0.5, 0, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0));
