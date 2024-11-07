@@ -13,14 +13,13 @@ public class Renderer
 {
     // target canvas for the rendering
     private static Canvas canvas;
-    private static Graphics2D g2d;
     private static int width, height;
 
     private static final List<Renderable> objects = new ArrayList<>();
     private static BufferedImage ksi = null;
 
     // framebuffer for the textures
-    private static final double FRAMEBUFFER_SCALE = 1.0;
+    private static final double FRAMEBUFFER_SCALE = 0.2;
     private static BufferedImage framebuffer;
 
     public static void init(Canvas canvas)
@@ -43,67 +42,47 @@ public class Renderer
     public static void removeRenderable(Renderable obj) { objects.remove(obj); }
     public static void clearRenderables() { objects.clear(); }
 
-    public static void render(Camera camera)
+    public static void render(Graphics2D g2d, Camera camera)
     {
-        BufferStrategy bufferStrategy = canvas.getBufferStrategy();
-        g2d = (Graphics2D) bufferStrategy.getDrawGraphics();
+        Graphics2D fbG2d = (Graphics2D) framebuffer.getGraphics();
 
-        g2d.setColor(new Color(0, 0, 0));
-        g2d.fillRect(0, 0, width, height);
+        // draw background
+        fbG2d.setColor(new Color(0, 0, 0));
+        fbG2d.fillRect(0, 0, width, height);
 
         AffineTransform transform = new AffineTransform();
         transform.shear(Math.cos(System.currentTimeMillis() / 179.3), Math.sin(System.currentTimeMillis() / 1311.0));
-        transform.scale(width / (double)ksi.getWidth(), (double)height / ksi.getHeight());
+        transform.scale(width / (double)ksi.getWidth() * FRAMEBUFFER_SCALE, (double)height / ksi.getHeight() * FRAMEBUFFER_SCALE);
         transform.translate(100 -(int)(Math.pow(Math.sin(System.currentTimeMillis() / 1000.0),2.0) * 300), 0);
-        g2d.drawImage(ksi, transform, null);
+        fbG2d.drawImage(ksi, transform, null);
 
-
-        g2d.translate(width / 2, height / 2);
-        g2d.scale(1.0, -1.0);
 
         // sort objects based on distance from camera (render nearest last)
         Collections.sort(objects, Comparator.comparingDouble((Renderable o) -> (o.getPosition().subtract(camera.getPosition())).getLengthSquared()).reversed());
 
+        fbG2d.translate(FRAMEBUFFER_SCALE * width / 2, FRAMEBUFFER_SCALE * height / 2);
         for (Renderable obj : objects)
-        {
             obj.render(camera);
 
-            // shading
-//            g2d.setColor(getShade(Color.CYAN, dot));
-//            if (i == 45)
-//            {
-//                double[] u = new double[] { 0.0, 1.0, 1.0 };
-//                double[] v = new double[] { 1.0, 1.0, 0.0 };
-//                drawTexturedTriangleToFramebuffer(ksi, xCoords, yCoords, u, v);
-//            }
-//            else if (i == 36)
-//            {
-//                double[] u = new double[] { 1.0, 0.0, 0.0 };
-//                double[] v = new double[] { 0.0, 0.0, 1.0 };
-//                drawTexturedTriangleToFramebuffer(ksi, xCoords, yCoords, u, v);
-//            }
-
-            // draw normal
-//                g2d.setColor(Color.YELLOW);
-//                g2d.fillOval((int) (start.getX() * width / 2.0) - 5, (int) (start.getY() * height / 2.0) - 5, 10, 10);
-//                g2d.drawLine((int) (start.getX() * width / 2.0), (int) (start.getY() * height / 2.0), (int) (end.getX() * width / 2.0), (int) (end.getY() * height / 2.0));
-        }
-        g2d.translate(-width / 2, -height / 2);
         g2d.drawImage(framebuffer, 0, 0, width, height, null);
 
         // clear the framebuffer
         int[] pixels = ((DataBufferInt) framebuffer.getRaster().getDataBuffer()).getData();
         Arrays.fill(pixels, 0);
-
-        // clean up
-        g2d.dispose();
-        bufferStrategy.show();
     }
 
     public static void drawTriangle(int[] xCoords, int[] yCoords, Color color)
     {
-        g2d.setColor(color);
-        g2d.fillPolygon(xCoords, yCoords, 3);
+        Graphics2D _g2d = (Graphics2D) framebuffer.getGraphics();
+        _g2d.translate(width / 2 * FRAMEBUFFER_SCALE, height / 2 * FRAMEBUFFER_SCALE);
+        _g2d.scale(1.0, -1.0);
+        _g2d.setColor(color);
+        for (int i = 0; i < 3; i++)
+        {
+            xCoords[i] = (int)(xCoords[i] * FRAMEBUFFER_SCALE);
+            yCoords[i] = (int)(yCoords[i] * FRAMEBUFFER_SCALE);
+        }
+        _g2d.fillPolygon(xCoords, yCoords, 3);
     }
 
     private static void drawTexturedTriangleToFramebuffer(BufferedImage texture, int[] xCoords, int[] yCoords, double[] u, double[] v)

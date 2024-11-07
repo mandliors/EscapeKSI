@@ -69,7 +69,7 @@ public class TestMain extends Canvas implements Runnable
 
         for (Cube cube : cubes)
             Renderer.addRenderable(cube);
-        Renderer.render(cam);
+        Renderer.render(g2d, cam);
 
         g2d.setColor(Color.yellow);
         Point mousePos = getMousePosition();

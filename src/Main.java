@@ -7,10 +7,11 @@ public class Main extends Canvas implements Runnable
     private static final int WIDTH = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
     private static final int HEIGHT = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
 
-    private static final int FPS = 60;
-    private static final int FRAME_TIME = 1_000_000_000 / FPS;
+    private static final int MAX_FPS = 120;
+    private static final double FRAME_TIME = 1.0 / MAX_FPS;
 
     private boolean windowShouldClose = false;
+    private double dt = 0.0;
 
     private Camera cam;
 
@@ -56,12 +57,10 @@ public class Main extends Canvas implements Runnable
     @Override
     public void run()
     {
-        Font bigFont = new Font("Monospaced", Font.BOLD, 40);
         Renderer.addRenderable(cube);
         Renderer.addRenderable(cube2);
         Renderer.addRenderable(tetra);
 
-        double dt = 0.0;
         while (!windowShouldClose)
         {
             long startTime = System.nanoTime();
@@ -74,26 +73,31 @@ public class Main extends Canvas implements Runnable
             render();
 
             dt = (System.nanoTime() - startTime) / 1_000_000_000.0;
-
-            Graphics2D g2d = (Graphics2D) getGraphics();
-            g2d.setColor(Color.GREEN);
-            g2d.setFont(bigFont);
-            g2d.drawString(String.format("%d FPS", (int)(1 / dt)), 10, 50);
+            if (dt < FRAME_TIME)
+            {
+                try { Thread.sleep((long)(1000 * (FRAME_TIME - dt))); } catch (Exception e) { e.printStackTrace(); }
+                dt = FRAME_TIME;
+            }
 
             if (Input.isKeyPressed(KeyEvent.VK_ESCAPE)) System.exit(0);
         }
     }
 
+    Font bigFont = new Font("Monospaced", Font.BOLD, 40);
     private void render()
     {
         Graphics2D g2d = (Graphics2D) getBufferStrategy().getDrawGraphics();
 
-        Renderer.render(cam);
+        Renderer.render(g2d, cam);
 
         g2d.setColor(Color.yellow);
         Point mousePos = getMousePosition();
         if (mousePos != null)
             g2d.fillOval(mousePos.x - 5, mousePos.y - 5, 10, 10);
+
+        g2d.setColor(Color.GREEN);
+        g2d.setFont(bigFont);
+        g2d.drawString(String.format("%d FPS", (int)(1.0 / dt)), 10, 50);
 
         g2d.dispose();
         getBufferStrategy().show();
