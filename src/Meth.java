@@ -124,4 +124,9 @@ public class Meth
 
         return worldToView;
     }
+
+    public static boolean isBetween(double v, double min, double max)
+    {
+        return min <= v && v <= max;
+    }
 }

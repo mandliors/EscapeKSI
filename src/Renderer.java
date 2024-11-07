@@ -1,5 +1,6 @@
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.io.File;
@@ -11,6 +12,7 @@ public class Renderer
 {
     // target canvas for the rendering
     private static Canvas canvas;
+    private static Graphics2D g2d;
     private static int width, height;
 
     private static final List<Renderable> objects = new ArrayList<>();
@@ -38,85 +40,43 @@ public class Renderer
         objects.add(obj);
     }
 
-    public static void render(Camera cam)
+    public static void render(Camera camera)
     {
-        Graphics2D g2d = (Graphics2D) canvas.getBufferStrategy().getDrawGraphics();
+        BufferStrategy bufferStrategy = canvas.getBufferStrategy();
+        g2d = (Graphics2D) bufferStrategy.getDrawGraphics();
 
         g2d.setColor(new Color(40, 40, 40));
         g2d.fillRect(0, 0, width, height);
 
         g2d.translate(width / 2, height / 2);
         g2d.scale(1.0, -1.0);
+
+        // sort objects based on distance from camera (render nearest last)
+        Collections.sort(objects, Comparator.comparingDouble((Renderable o) -> (o.getPosition().subtract(camera.getPosition())).getLengthSquared()).reversed());
+
         for (Renderable obj : objects)
         {
-            Mat4 viewProj = cam.getProjection().multiply(cam.getView());
+            obj.render(camera);
 
-            for (int i = 0; i < obj.getVertices().length; i += 9)
-            {
-                // model->world
-                Vec4[] points = new Vec4[3];
-                for (int j = 0; j < 3; j++)
-                {
-                    Vec4 vertex = new Vec4(0.0);
-                    vertex.setX(obj.getVertices()[j * 3 + i + 0]);
-                    vertex.setY(obj.getVertices()[j * 3 + i + 1]);
-                    vertex.setZ(obj.getVertices()[j * 3 + i + 2]);
-                    vertex.setW(1.0);
+            // shading
+//            g2d.setColor(getShade(Color.CYAN, dot));
+//            if (i == 45)
+//            {
+//                double[] u = new double[] { 0.0, 1.0, 1.0 };
+//                double[] v = new double[] { 1.0, 1.0, 0.0 };
+//                drawTexturedTriangleToFramebuffer(ksi, xCoords, yCoords, u, v);
+//            }
+//            else if (i == 36)
+//            {
+//                double[] u = new double[] { 1.0, 0.0, 0.0 };
+//                double[] v = new double[] { 0.0, 0.0, 1.0 };
+//                drawTexturedTriangleToFramebuffer(ksi, xCoords, yCoords, u, v);
+//            }
 
-                    points[j] = obj.getModel().multiply(vertex);
-                }
-
-                // back-face culling in world space: (vertexPos - camPos) * normal should be positive to be drawn
-                Vec3 normal = points[2].xyz().subtract(points[0].xyz()).cross(points[1].xyz().subtract(points[0].xyz())).normalize();
-                double dot = (points[0].xyz().subtract(cam.getPosition())).normalize().dot(normal);
-                if (dot <= 0.0)
-                    continue;
-
-                // calculuate normal (points have to be in view space
-//                Vec4 start = points[0].add(points[1]).add(points[2]).scale(1.0 / 3.0);
-//                Vec4 end = start.subtract(new Vec4(normal.normalize().scale(0.2), 1.0));
-//                start = cam.getProjection().multiply(start); end = cam.getProjection().multiply(end);
-//                start.setX(start.getX() / start.getW()); end.setX(end.getX() / end.getW());
-//                start.setY(start.getY() / start.getW()); end.setY(end.getY() / end.getW());
-//                start.setZ(start.getZ() / start.getW()); end.setZ(end.getZ() / end.getW());
-
-                // world->view->clip
-                for (int j = 0; j < 3; j++)
-                {
-                    points[j] = viewProj.multiply(points[j]);
-                    points[j].setX(points[j].getX() / points[j].getW());
-                    points[j].setY(points[j].getY() / points[j].getW());
-                    points[j].setZ(points[j].getZ() / points[j].getW());
-                }
-
-                // clip->screen
-                double scaleH = width / 2.0;
-                double scaleV = height / 2.0;
-                int[] xCoords = new int[] { (int) (points[0].getX() * scaleH), (int) (points[1].getX() * scaleH), (int) (points[2].getX() * scaleH)};
-                int[] yCoords = new int[] { (int) (points[0].getY() * scaleV), (int) (points[1].getY() * scaleV), (int) (points[2].getY() * scaleV)};
-
-                // shading
-                g2d.setColor(getShade(Color.CYAN, dot));
-                if (i == 45)
-                {
-                    double[] u = new double[] { 0.0, 1.0, 1.0 };
-                    double[] v = new double[] { 1.0, 1.0, 0.0 };
-                    drawTexturedTriangleToFramebuffer(ksi, xCoords, yCoords, u, v);
-                }
-                else if (i == 36)
-                {
-                    double[] u = new double[] { 1.0, 0.0, 0.0 };
-                    double[] v = new double[] { 0.0, 0.0, 1.0 };
-                    drawTexturedTriangleToFramebuffer(ksi, xCoords, yCoords, u, v);
-                }
-                else
-                    g2d.fillPolygon(xCoords, yCoords, 3);
-
-                // draw normal
+            // draw normal
 //                g2d.setColor(Color.YELLOW);
 //                g2d.fillOval((int) (start.getX() * width / 2.0) - 5, (int) (start.getY() * height / 2.0) - 5, 10, 10);
 //                g2d.drawLine((int) (start.getX() * width / 2.0), (int) (start.getY() * height / 2.0), (int) (end.getX() * width / 2.0), (int) (end.getY() * height / 2.0));
-            }
         }
         g2d.translate(-width / 2, -height / 2);
         g2d.drawImage(framebuffer, 0, 0, width, height, null);
@@ -125,13 +85,20 @@ public class Renderer
         int[] pixels = ((DataBufferInt) framebuffer.getRaster().getDataBuffer()).getData();
         Arrays.fill(pixels, 0);
 
-        // remove all objects
-        objects.clear();
+        // clean up
+        g2d.dispose();
+        bufferStrategy.show();
+    }
+
+    public static void drawTriangle(int[] xCoords, int[] yCoords, Color color)
+    {
+        g2d.setColor(color);
+        g2d.fillPolygon(xCoords, yCoords, 3);
     }
 
     private static void drawTexturedTriangleToFramebuffer(BufferedImage texture, int[] xCoords, int[] yCoords, double[] u, double[] v)
     {
-        // sort triangles (v0 - left, v1 - middle, v2 - right), store indices for the vertices
+        // sort vertices (v0 - left, v1 - middle, v2 - right), store indices for the vertices
         int v0, v1, v2;
         if (xCoords[0] < xCoords[1])
         {
@@ -240,6 +207,8 @@ public class Renderer
         }
     }
 
+    public static int getWidth() { return width; }
+    public static int getHeight() { return height; }
 
     private static double[] interpolateUV(int x, int y, int[] xPoints, int[] yPoints, double[] u, double[] v)
     {
@@ -278,7 +247,7 @@ public class Renderer
         return sameSide;
     }
 
-    private static Color getShade(Color color, double shade)
+    public static Color getShade(Color color, double shade)
     {
         //source: https://www.alibabacloud.com/blog/construct-a-simple-3d-rendering-engine-with-java_599599
 

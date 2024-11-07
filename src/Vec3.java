@@ -29,6 +29,7 @@ public class Vec3
 
     public Vec3 add(Vec3 other) { return new Vec3(x + other.getX(), y + other.getY(), z + other.getZ()); }
     public Vec3 subtract(Vec3 other) { return add(other.negate()); }
+    public Vec3 multiply(Vec3 other) { return new Vec3(x * other.getX(), y * other.getY(), z * other.getZ()); }
     public Vec3 negate() { return scale(-1); }
     public Vec3 scale(double scalar) { return new Vec3(x * scalar, y * scalar, z * scalar); }
     public Vec3 normalize() { double length = getLength(); return new Vec3(x / length, y / length, z / length); }

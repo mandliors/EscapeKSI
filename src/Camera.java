@@ -61,8 +61,8 @@ public class Camera
     public void setMouseLock(boolean lockMouse) { this.lockMouse = lockMouse; }
 
     public Vec3 getPosition() { return position; }
-    public Mat4 getProjection() { return projection; }
-    public Mat4 getView()
+    public Mat4 getProjectionMatrix() { return projection; }
+    public Mat4 getViewMatrix()
     {
         updateData();
         return view;

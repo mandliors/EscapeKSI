@@ -16,6 +16,7 @@ public class Main extends Canvas implements Runnable
 
     private Tetrahedron tetra;
     private Cube cube;
+    private Cube cube2;
 
     public Main()
     {
@@ -40,8 +41,14 @@ public class Main extends Canvas implements Runnable
         Input.init(this);
         //cam.setMouseLock(true);
 
-        tetra = new Tetrahedron(new Vec3(0.5, 0.5, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0));
-        cube = new Cube(new Vec3(-0.5, 0, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0));
+        tetra = new Tetrahedron(new Vec3(0.5, 0.5, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.CYAN);
+        cube = new Cube(new Vec3(-0.5, 0, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE);
+        cube2 = new Cube(new Vec3(-0.1, -0.4, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE);
+        Renderer.add(new Cube(new Vec3(-0.2, 0.1, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE));
+        Renderer.add(new Cube(new Vec3( 0.4, 0.4, -6.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE));
+        Renderer.add(new Cube(new Vec3(-0.4, 0.2, -7.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE));
+        Renderer.add(new Cube(new Vec3( 0.8, -0.5, -4.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE));
+        Renderer.add(new Cube(new Vec3( 0.6, -0.1, -3.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE));
 
         new Thread(this).start();
     }
@@ -50,6 +57,9 @@ public class Main extends Canvas implements Runnable
     public void run()
     {
         Font bigFont = new Font("Monospaced", Font.BOLD, 40);
+        Renderer.add(cube);
+        Renderer.add(cube2);
+        Renderer.add(tetra);
 
         double dt = 0.0;
         while (!windowShouldClose)
@@ -58,8 +68,9 @@ public class Main extends Canvas implements Runnable
 
             Input.update();
             cam.update(dt);
-            tetra._rotate(dt);
-            cube._rotate(dt);
+            tetra.rotate(new Vec3(0.0, 30 * dt, 0.0));
+            cube.rotate(new Vec3(0.0, 80 * dt, 0.0));
+            cube2.rotate(new Vec3(0.0, 100 * dt, 0.0));
             render();
 
             dt = (System.nanoTime() - startTime) / 1_000_000_000.0;
@@ -77,8 +88,6 @@ public class Main extends Canvas implements Runnable
     {
         Graphics2D g2d = (Graphics2D) getBufferStrategy().getDrawGraphics();
 
-        Renderer.add(cube);
-        Renderer.add(tetra);
         Renderer.render(cam);
 
         g2d.setColor(Color.yellow);

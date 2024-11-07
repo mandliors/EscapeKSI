@@ -41,7 +41,7 @@ public class TestMain extends Canvas implements Runnable
         Input.init(this);
 
         cubes = new ArrayList<>();
-        cubes.add(new Cube(new Vec3(0,-0.5, -5.0), new Vec3(1.0, 1.5, 1.0), new Vec3(0.0)));
+        cubes.add(new Cube(new Vec3(0,-0.5, -5.0), new Vec3(1.0, 1.5, 1.0), new Vec3(0.0), Color.GREEN));
 
         new Thread(this).start();
     }
