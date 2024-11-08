@@ -22,6 +22,59 @@ public class Renderer
     private static final double FRAMEBUFFER_SCALE = 0.2;
     private static BufferedImage framebuffer;
 
+    // data for the objects
+    public static ObjectData ColoredCubeData;
+    public static ObjectData ColoredTetrahedronData;
+
+    static {
+        ColoredCubeData = new ObjectData(
+                new double[] {
+                         0.5, -0.5, -0.5, // 0. bottom right back
+                        -0.5, -0.5, -0.5, // 1. bottom left  back
+                        -0.5, -0.5, 0.5, // 2. bottom left  front
+                         0.5, -0.5, 0.5, // 3. bottom right front
+                         0.5, 0.5, -0.5, // 4. top    right back
+                        -0.5, 0.5, -0.5, // 5. top    left  back
+                        -0.5, 0.5, 0.5, // 6. top    left  front
+                         0.5, 0.5, 0.5  // 7. top    right front
+                },
+                new short[] {
+                        // back face
+                        4, 0, 1,
+                        1, 5, 4,
+                        // front face
+                        2, 3, 7,
+                        7, 6, 2,
+                        // left face
+                        6, 5, 1,
+                        1, 2, 6,
+                        // right face
+                        0, 4, 7,
+                        7, 3, 0,
+                        // bottom face
+                        1, 0, 3,
+                        3, 2, 1,
+                        // top face
+                        7, 4, 5,
+                        5, 6, 7
+                }
+        );
+        ColoredTetrahedronData = new ObjectData(
+                new double[] {
+                        -0.5,  0.5, -0.5, // 0. top    left  back
+                        -0.5, -0.5,  0.5, // 1. bottom left  front
+                         0.5,  0.5,  0.5, // 2. top    right front
+                         0.5, -0.5, -0.5  // 3. bottom right backs
+                },
+                new short[] {
+                        0, 1, 2, // face 1
+                        2, 1, 3, // face 2
+                        2, 3, 0, // face 3
+                        0, 3, 1  // face 4
+                }
+        );
+    }
+
     public static void init(Canvas canvas)
     {
         try { ksi = ImageIO.read(new File("res/ksi.png")); }

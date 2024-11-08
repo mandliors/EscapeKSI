@@ -15,7 +15,7 @@ public class TestMain extends Canvas implements Runnable
     private boolean windowShouldClose = false;
 
     private Camera cam;
-    private List<Cube> cubes;
+    private List<ColoredCube> cubes;
 
     public TestMain()
     {
@@ -40,7 +40,7 @@ public class TestMain extends Canvas implements Runnable
         Input.init(this);
 
         cubes = new ArrayList<>();
-        cubes.add(new Cube(new Vec3(0,-0.5, -5.0), new Vec3(1.0, 1.5, 1.0), new Vec3(0.0), Color.GREEN));
+        cubes.add(new ColoredCube(new Vec3(0,-0.5, -5.0), new Vec3(1.0, 1.5, 1.0), new Vec3(0.0), Color.GREEN));
 
         new Thread(this).start();
     }
@@ -67,7 +67,7 @@ public class TestMain extends Canvas implements Runnable
     {
         Graphics2D g2d = (Graphics2D) getBufferStrategy().getDrawGraphics();
 
-        for (Cube cube : cubes)
+        for (ColoredCube cube : cubes)
             Renderer.addRenderable(cube);
         Renderer.render(g2d, cam);
 

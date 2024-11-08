@@ -16,8 +16,8 @@ public class Main extends Canvas implements Runnable
     private Camera cam;
 
     private Tetrahedron tetra;
-    private Cube cube;
-    private Cube cube2;
+    private ColoredCube cube;
+    private ColoredCube cube2;
 
     public Main()
     {
@@ -43,13 +43,13 @@ public class Main extends Canvas implements Runnable
         cam.setMouseLock(true);
 
         tetra = new Tetrahedron(new Vec3(0.5, 0.5, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.CYAN);
-        cube = new Cube(new Vec3(-0.5, 0, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE);
-        cube2 = new Cube(new Vec3(-0.1, -0.4, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE);
-        Renderer.addRenderable(new Cube(new Vec3(-0.2, 0.1, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE));
-        Renderer.addRenderable(new Cube(new Vec3( 0.4, 0.4, -6.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE));
-        Renderer.addRenderable(new Cube(new Vec3(-0.4, 0.2, -7.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE));
-        Renderer.addRenderable(new Cube(new Vec3( 0.8, -0.5, -4.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE));
-        Renderer.addRenderable(new Cube(new Vec3( 0.6, -0.1, -3.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE));
+        cube = new ColoredCube(new Vec3(-0.5, 0, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE);
+        cube2 = new ColoredCube(new Vec3(-0.1, -0.4, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE);
+        Renderer.addRenderable(new ColoredCube(new Vec3(-0.2, 0.1, -5.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE));
+        Renderer.addRenderable(new ColoredCube(new Vec3( 0.4, 0.4, -6.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE));
+        Renderer.addRenderable(new ColoredCube(new Vec3(-0.4, 0.2, -7.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE));
+        Renderer.addRenderable(new ColoredCube(new Vec3( 0.8, -0.5, -4.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE));
+        Renderer.addRenderable(new ColoredCube(new Vec3( 0.6, -0.1, -3.0), new Vec3(0.5), new Vec3(30.0, 20.0, 10.0), Color.ORANGE));
 
         new Thread(this).start();
     }

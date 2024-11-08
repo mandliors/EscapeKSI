@@ -1,67 +1,24 @@
 import java.awt.*;
 
-public class Cube extends Renderable
+public abstract class ColoredObject extends Renderable
 {
-    private static double[] vertices = new double[] {
-            0.5, -0.5, -0.5, // 0. bottom right back
-            -0.5, -0.5, -0.5, // 1. bottom left  back
-            -0.5, -0.5,  0.5, // 2. bottom left  front
-            0.5, -0.5,  0.5, // 3. bottom right front
-            0.5,  0.5, -0.5, // 4. top    right back
-            -0.5,  0.5, -0.5, // 5. top    left  back
-            -0.5,  0.5,  0.5, // 6. top    left  front
-            0.5,  0.5,  0.5  // 7. top    right front
-    };
-    private static short[] indices = new short[] {
-            // back face
-            4, 0, 1,
-            1, 5, 4,
-            // front face
-            2, 3, 7,
-            7, 6, 2,
-            // left face
-            6, 5, 1,
-            1, 2, 6,
-            // right face
-            0, 4, 7,
-            7, 3, 0,
-            // bottom face
-            1, 0, 3,
-            3, 2, 1,
-            // top face
-            7, 4, 5,
-            5, 6, 7
-    };
-
-    Color color;
-
-    public Cube()
-    {
-        this(new Vec3(0.0), new Vec3(1.0), new Vec3(0.0), Color.WHITE);
-    }
-    public Cube(Vec3 position, Vec3 scale, Vec3 rotation, Color color)
-    {
-        translate(position);
-        scale(scale);
-        rotate(rotation);
-
-        this.color = color;
-    }
+    protected ObjectData data;
+    protected Color color;
 
     public void render(Camera camera)
     {
         Mat4 viewProj = camera.getProjectionMatrix().multiply(camera.getViewMatrix());
 
-        for (int i = 0; i < indices.length; i += 3)
+        for (int i = 0; i < data.getIndices().length; i += 3)
         {
             // model->world
             Vec4[] points = new Vec4[3];
             for (int j = 0; j < 3; j++)
             {
                 Vec4 vertex = new Vec4(0.0);
-                vertex.setX(vertices[3 * indices[i + j] + 0]);
-                vertex.setY(vertices[3 * indices[i + j] + 1]);
-                vertex.setZ(vertices[3 * indices[i + j] + 2]);
+                vertex.setX(data.getVertices()[3 * data.getIndices()[i + j] + 0]);
+                vertex.setY(data.getVertices()[3 * data.getIndices()[i + j] + 1]);
+                vertex.setZ(data.getVertices()[3 * data.getIndices()[i + j] + 2]);
                 vertex.setW(1.0);
 
                 points[j] = getModelMatrix().multiply(vertex);
@@ -92,8 +49,8 @@ public class Cube extends Renderable
 
             // discard clipped vertices (triangles)
             if (!Meth.isBetween(points[0].getX(), -1.0, 1.0) || !Meth.isBetween(points[0].getY(), -1.0, 1.0) || !Meth.isBetween(points[0].getZ(), -1.0, 1.0) ||
-                !Meth.isBetween(points[1].getX(), -1.0, 1.0) || !Meth.isBetween(points[1].getY(), -1.0, 1.0) || !Meth.isBetween(points[1].getZ(), -1.0, 1.0) ||
-                !Meth.isBetween(points[2].getX(), -1.0, 1.0) || !Meth.isBetween(points[2].getY(), -1.0, 1.0) || !Meth.isBetween(points[2].getZ(), -1.0, 1.0))
+                    !Meth.isBetween(points[1].getX(), -1.0, 1.0) || !Meth.isBetween(points[1].getY(), -1.0, 1.0) || !Meth.isBetween(points[1].getZ(), -1.0, 1.0) ||
+                    !Meth.isBetween(points[2].getX(), -1.0, 1.0) || !Meth.isBetween(points[2].getY(), -1.0, 1.0) || !Meth.isBetween(points[2].getZ(), -1.0, 1.0))
                 continue;
 
             // clip->screen
@@ -104,7 +61,4 @@ public class Cube extends Renderable
             Renderer.drawTriangle(xCoords, yCoords, Renderer.getShade(color, dot));
         }
     }
-
-    public double[] getVertices() { return vertices; }
-    public short[] getIndices() { return indices; }
 }

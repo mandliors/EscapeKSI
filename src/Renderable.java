@@ -15,9 +15,6 @@ public abstract class Renderable
     public void rotate(Vec3 rotation) { this.rotation = this.rotation.add(rotation); }
     public void scale(Vec3 scale) { this.scale = this.scale.multiply(scale); }
 
-    public abstract double[] getVertices();
-    public abstract short[] getIndices();
-
     public Mat4 getModelMatrix() { _updateModelMatrix(); return model; }
     private void _updateModelMatrix()
     {
