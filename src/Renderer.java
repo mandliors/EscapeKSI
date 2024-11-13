@@ -1,11 +1,9 @@
-import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.geom.AffineTransform;
-import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
@@ -13,132 +11,180 @@ public class Renderer
 {
     // target canvas for the rendering
     private static Canvas canvas;
-    private static int width, height;
+    private static int width = 0, height = 0;
 
     private static final List<Renderable> objects = new ArrayList<>();
-    private static BufferedImage ksi = null;
 
     // framebuffer for the textures
-    private static final double FRAMEBUFFER_SCALE = 0.2;
+    private static double resolution = 1.0;
     private static BufferedImage framebuffer;
+    private static Graphics2D fbG2d;
+    private static int[] fbPixels;
 
     // data for the objects
-    public static ObjectData ColoredCubeData;
-    public static ObjectData ColoredTetrahedronData;
+    public static double[] PlainVertices;
+    public static double[] CubeVertices;
+    public static double[] TetrahedronVertices;
 
     static {
-        ColoredCubeData = new ObjectData(
-                new double[] {
-                         0.5, -0.5, -0.5, // 0. bottom right back
-                        -0.5, -0.5, -0.5, // 1. bottom left  back
-                        -0.5, -0.5, 0.5, // 2. bottom left  front
-                         0.5, -0.5, 0.5, // 3. bottom right front
-                         0.5, 0.5, -0.5, // 4. top    right back
-                        -0.5, 0.5, -0.5, // 5. top    left  back
-                        -0.5, 0.5, 0.5, // 6. top    left  front
-                         0.5, 0.5, 0.5  // 7. top    right front
-                },
-                new short[] {
-                        // back face
-                        4, 0, 1,
-                        1, 5, 4,
-                        // front face
-                        2, 3, 7,
-                        7, 6, 2,
-                        // left face
-                        6, 5, 1,
-                        1, 2, 6,
-                        // right face
-                        0, 4, 7,
-                        7, 3, 0,
-                        // bottom face
-                        1, 0, 3,
-                        3, 2, 1,
-                        // top face
-                        7, 4, 5,
-                        5, 6, 7
-                }
-        );
-        ColoredTetrahedronData = new ObjectData(
-                new double[] {
-                        -0.5,  0.5, -0.5, // 0. top    left  back
-                        -0.5, -0.5,  0.5, // 1. bottom left  front
-                         0.5,  0.5,  0.5, // 2. top    right front
-                         0.5, -0.5, -0.5  // 3. bottom right backs
-                },
-                new short[] {
-                        0, 1, 2, // face 1
-                        2, 1, 3, // face 2
-                        2, 3, 0, // face 3
-                        0, 3, 1  // face 4
-                }
-        );
+        PlainVertices = new double[]{
+                // front face
+                -0.5, -0.5, 0.0, 0.0, 1.0,
+                 0.5, -0.5, 0.0, 1.0, 1.0,
+                 0.5,  0.5, 0.0, 1.0, 0.0,
+                 0.5,  0.5, 0.0, 1.0, 0.0,
+                -0.5,  0.5, 0.0, 0.0, 0.0,
+                -0.5, -0.5, 0.0, 0.0, 1.0,
+                // back face
+                 0.5,  0.5, 0.0, 1.0, 0.0,
+                 0.5, -0.5, 0.0, 1.0, 1.0,
+                -0.5, -0.5, 0.0, 0.0, 1.0,
+                -0.5, -0.5, 0.0, 0.0, 1.0,
+                -0.5,  0.5, 0.0, 0.0, 0.0,
+                 0.5,  0.5, 0.0, 1.0, 0.0
+        };
+        CubeVertices = new double[] {
+                // back face
+                 0.5,  0.5, -0.5,  0.0, 0.0,
+                 0.5, -0.5, -0.5,  0.0, 1.0,
+                -0.5, -0.5, -0.5,  1.0, 1.0,
+                -0.5, -0.5, -0.5,  1.0, 1.0,
+                -0.5,  0.5, -0.5,  1.0, 0.0,
+                 0.5,  0.5, -0.5,  0.0, 0.0,
+                // front face
+                -0.5, -0.5,  0.5,  0.0, 1.0,
+                 0.5, -0.5,  0.5,  1.0, 1.0,
+                 0.5,  0.5,  0.5,  1.0, 0.0,
+                 0.5,  0.5,  0.5,  1.0, 0.0,
+                -0.5,  0.5,  0.5,  0.0, 0.0,
+                -0.5, -0.5,  0.5,  0.0, 1.0,
+                // left face
+                -0.5,  0.5,  0.5,  1.0, 0.0,
+                -0.5,  0.5, -0.5,  0.0, 0.0,
+                -0.5, -0.5, -0.5,  0.0, 1.0,
+                -0.5, -0.5, -0.5,  0.0, 1.0,
+                -0.5, -0.5,  0.5,  1.0, 1.0,
+                -0.5,  0.5,  0.5,  1.0, 0.0,
+                // right face
+                 0.5, -0.5, -0.5,  1.0, 1.0,
+                 0.5,  0.5, -0.5,  1.0, 0.0,
+                 0.5,  0.5,  0.5,  0.0, 0.0,
+                 0.5,  0.5,  0.5,  0.0, 0.0,
+                 0.5, -0.5,  0.5,  0.0, 1.0,
+                 0.5, -0.5, -0.5,  1.0, 1.0,
+                // bottom face
+                -0.5, -0.5, -0.5,  0.0, 1.0,
+                 0.5, -0.5, -0.5,  1.0, 1.0,
+                 0.5, -0.5,  0.5,  1.0, 0.0,
+                 0.5, -0.5,  0.5,  1.0, 0.0,
+                -0.5, -0.5,  0.5,  0.0, 0.0,
+                -0.5, -0.5, -0.5,  0.0, 1.0,
+                // top face
+                 0.5,  0.5,  0.5,  1.0, 1.0,
+                 0.5,  0.5, -0.5,  1.0, 0.0,
+                -0.5,  0.5, -0.5,  0.0, 0.0,
+                -0.5,  0.5, -0.5,  0.0, 0.0,
+                -0.5,  0.5,  0.5,  0.0, 1.0,
+                 0.5,  0.5,  0.5,  1.0, 1.0
+        };
+        TetrahedronVertices = new double[] {
+                // face 1
+                -0.5,  0.5, -0.5,  0.5, 0.0,
+                -0.5, -0.5,  0.5,  0.0, 1.0,
+                 0.5,  0.5,  0.5,  1.0, 1.0,
+                // face 2
+                 0.5,  0.5,  0.5,  0.5, 0.0,
+                -0.5, -0.5,  0.5,  0.0, 1.0,
+                 0.5, -0.5, -0.5,  1.0, 1.0,
+                // face 3
+                 0.5,  0.5,  0.5,  0.5, 0.0,
+                 0.5, -0.5, -0.5,  0.0, 1.0,
+                -0.5,  0.5, -0.5,  1.0, 1.0,
+                // face 4
+                -0.5,  0.5, -0.5,  0.5, 0.0,
+                 0.5, -0.5, -0.5,  0.0, 1.0,
+                -0.5, -0.5,  0.5,  1.0, 1.0
+        };
     }
+
+    // res has to be between 0 and 1
+    public static void setResolution(double res)
+    {
+        resolution = Math.clamp(res, 0.01, 1.0);
+        updateFramebuffer();
+    }
+    public static double getResolution() { return resolution; }
+
+    public static int getWidth() { return width; }
+    public static int getHeight() { return height; }
 
     public static void init(Canvas canvas)
     {
-        try { ksi = ImageIO.read(new File("res/ksi.png")); }
-        catch (IOException e) { ksi = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB); }
-
         Renderer.canvas = canvas;
+
+        canvas.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                width = canvas.getWidth();
+                height = canvas.getHeight();
+
+                updateFramebuffer();
+                canvas.repaint();
+            }
+        });
 
         Renderer.width = canvas.getWidth();
         Renderer.height = canvas.getHeight();
 
-        Renderer.framebuffer = new BufferedImage((int)(width * FRAMEBUFFER_SCALE), (int)(height * FRAMEBUFFER_SCALE), BufferedImage.TYPE_INT_ARGB);
+        AssetManager.loadTexture("bg", "res/ksi.png");
+
+        updateFramebuffer();
     }
 
-    public static void addRenderable(Renderable obj)
-    {
-        objects.add(obj);
-    }
+    public static void addRenderable(Renderable obj) { objects.add(obj); }
     public static void removeRenderable(Renderable obj) { objects.remove(obj); }
     public static void clearRenderables() { objects.clear(); }
 
     public static void render(Graphics2D g2d, Camera camera)
     {
-        Graphics2D fbG2d = (Graphics2D) framebuffer.getGraphics();
+        fbG2d = framebuffer.createGraphics();
 
-        // draw background
-        fbG2d.setColor(new Color(0, 0, 0));
-        fbG2d.fillRect(0, 0, width, height);
+        // clear background
+        Arrays.fill(fbPixels, 0xFF000000);
 
+        // draw KSI bg
         AffineTransform transform = new AffineTransform();
         transform.shear(Math.cos(System.currentTimeMillis() / 179.3), Math.sin(System.currentTimeMillis() / 1311.0));
-        transform.scale(width / (double)ksi.getWidth() * FRAMEBUFFER_SCALE, (double)height / ksi.getHeight() * FRAMEBUFFER_SCALE);
+        transform.scale(width / (double) AssetManager.getTexture("bg").get().getWidth() * resolution, (double)height / AssetManager.getTexture("bg").get().getHeight() * resolution);
         transform.translate(100 -(int)(Math.pow(Math.sin(System.currentTimeMillis() / 1000.0),2.0) * 300), 0);
-        fbG2d.drawImage(ksi, transform, null);
-
+        fbG2d.drawImage(AssetManager.getTexture("bg").get(), transform, null);
 
         // sort objects based on distance from camera (render nearest last)
         Collections.sort(objects, Comparator.comparingDouble((Renderable o) -> (o.getPosition().subtract(camera.getPosition())).getLengthSquared()).reversed());
 
-        fbG2d.translate(FRAMEBUFFER_SCALE * width / 2, FRAMEBUFFER_SCALE * height / 2);
+        // draw objects to the framebuffer
+        fbG2d.translate(width / 2 * resolution, height / 2 * resolution);
+        fbG2d.scale(1.0, -1.0);
         for (Renderable obj : objects)
             obj.render(camera);
 
+        // draw the framebuffer
+        fbG2d.dispose();
         g2d.drawImage(framebuffer, 0, 0, width, height, null);
-
-        // clear the framebuffer
-        int[] pixels = ((DataBufferInt) framebuffer.getRaster().getDataBuffer()).getData();
-        Arrays.fill(pixels, 0);
     }
 
     public static void drawTriangle(int[] xCoords, int[] yCoords, Color color)
     {
-        Graphics2D _g2d = (Graphics2D) framebuffer.getGraphics();
-        _g2d.translate(width / 2 * FRAMEBUFFER_SCALE, height / 2 * FRAMEBUFFER_SCALE);
-        _g2d.scale(1.0, -1.0);
-        _g2d.setColor(color);
+        fbG2d.setColor(color);
         for (int i = 0; i < 3; i++)
         {
-            xCoords[i] = (int)(xCoords[i] * FRAMEBUFFER_SCALE);
-            yCoords[i] = (int)(yCoords[i] * FRAMEBUFFER_SCALE);
+            xCoords[i] = (int) (xCoords[i] * resolution);
+            yCoords[i] = (int) (yCoords[i] * resolution);
         }
-        _g2d.fillPolygon(xCoords, yCoords, 3);
+        fbG2d.fillPolygon(xCoords, yCoords, 3);
     }
 
-    private static void drawTexturedTriangleToFramebuffer(BufferedImage texture, int[] xCoords, int[] yCoords, double[] u, double[] v)
+    public static void drawTexturedTriangle(BufferedImage texture, int[] xCoords, int[] yCoords, double[] u, double[] v)
     {
         // sort vertices (v0 - left, v1 - middle, v2 - right), store indices for the vertices
         int v0, v1, v2;
@@ -170,87 +216,92 @@ public class Renderer
             v2 = 2;
         }
 
-        // slopes for the sides
-        double m1 = xCoords[v1] == xCoords[v0] ? 0 :  (double)(yCoords[v1] - yCoords[v0]) / (xCoords[v1] - xCoords[v0]);
-        double m2 = xCoords[v2] == xCoords[v0] ? 0 : (double)(yCoords[v2] - yCoords[v0]) / (xCoords[v2] - xCoords[v0]);
-
-        // m1 has to be bigger
-        if (m2 > m1)
+        // if there is a 'left triangle' to be drawn
+        if (xCoords[v0] != xCoords[v1])
         {
-            double tmp = m1;
-            m1 = m2;
-            m2 = tmp;
-        }
+            // slopes for the sides
+            double m1 = (double) (yCoords[v1] - yCoords[v0]) / (xCoords[v1] - xCoords[v0]);
+            double m2 = (double) (yCoords[v2] - yCoords[v0]) / (xCoords[v2] - xCoords[v0]);
 
-        // iterate through the columns from the left until the middle
-        double y1 = yCoords[v0], y2 = yCoords[v0];
-        for (int x = xCoords[v0]; x <= xCoords[v1]; x++)
-        {
-            y1 += m1;
-            y2 += m2;
-
-            // iterate through the pixels in the column
-            for (double y = y1; y >= y2; y--)
+            // m1 has to be bigger
+            if (m2 > m1)
             {
-                double[] uv = interpolateUV(x, (int)y, xCoords, yCoords, u, v);
+                double tmp = m1;
+                m1 = m2;
+                m2 = tmp;
+            }
 
-                int texX = (int) (uv[0] * texture.getWidth());
-                int texY = (int) (uv[1] * texture.getHeight());
-                texX = Math.clamp(texX, 0, texture.getWidth() - 1);
-                texY = Math.clamp(texY, 0, texture.getHeight() - 1);
+            // iterate through the columns from the left until the middle
+            double y1 = yCoords[v0], y2 = yCoords[v0];
+            for (int x = xCoords[v0]; x < xCoords[v1]; x++)
+            {
+                y1 += m1;
+                y2 += m2;
 
-                int fbX = (int)((x + (double)width / 2) * FRAMEBUFFER_SCALE);
-                int fbY = (int)((y + (double)height / 2) * FRAMEBUFFER_SCALE);
-                if (0 <= fbX && fbX < framebuffer.getWidth() &&
-                        0 <= fbY && fbY < framebuffer.getHeight())
+                // iterate through the pixels in the column
+                for (double y = y1; y >= y2; y--)
                 {
-                    framebuffer.setRGB(fbX, fbY, texture.getRGB(texX, texY));
+                    double[] uv = interpolateUV(x, (int) y, xCoords, yCoords, u, v);
+                    int texX = Math.clamp((int) (uv[0] * texture.getWidth()), 0, texture.getWidth() - 1);
+                    int texY = Math.clamp((int) (uv[1] * texture.getHeight()), 0, texture.getHeight() - 1);
+
+                    int fbX = (int) ((x + (double) width / 2) * resolution);
+                    int fbY = (int) ((-y + (double) height / 2) * resolution);
+                    if (fbX < 0 || framebuffer.getWidth() <= fbX) break;
+                    if (0 <= fbY && fbY < framebuffer.getHeight())
+                    {
+                        int color = texture.getRGB(texX, texY);
+                        // if the pixel is not transparent
+                        if (((color >> 24) & 0xFF) != 0)
+                            fbPixels[fbY * framebuffer.getWidth() + fbX] = color;
+                    }
                 }
             }
         }
 
-        // slopes for the sides
-        m1 = xCoords[v1] == xCoords[v2] ? 0 : (double)(yCoords[v1] - yCoords[v2]) / (xCoords[v1] - xCoords[v2]);
-        m2 = xCoords[v0] == xCoords[v2] ? 0 : (double)(yCoords[v0] - yCoords[v2]) / (xCoords[v0] - xCoords[v2]);
-
-        // m1 has to be smaller
-        if (m2 < m1)
+        // if there is a 'right triangle' to be drawn
+        if (xCoords[v1] != xCoords[v2])
         {
-            double tmp = m1;
-            m1 = m2;
-            m2 = tmp;
-        }
+            // slopes for the sides
+            double m1 = (double) (yCoords[v1] - yCoords[v2]) / (xCoords[v1] - xCoords[v2]);
+            double m2 = (double) (yCoords[v0] - yCoords[v2]) / (xCoords[v0] - xCoords[v2]);
 
-        // iterate through the columns from the right until the middle
-        y1 = yCoords[v2]; y2 = yCoords[v2];
-        for (int x = xCoords[v2]; x > xCoords[v1]; x--)
-        {
-            y1 -= m1;
-            y2 -= m2;
-
-            // iterate through the pixels in the column
-            for (double y = y1; y >= y2; y--)
+            // m1 has to be smaller
+            if (m2 < m1)
             {
-                double[] uv = interpolateUV(x, (int)y, xCoords, yCoords, u, v);
+                double tmp = m1;
+                m1 = m2;
+                m2 = tmp;
+            }
 
-                int texX = (int) (uv[0] * texture.getWidth());
-                int texY = (int) (uv[1] * texture.getHeight());
-                texX = Math.clamp(texX, 0, texture.getWidth() - 1);
-                texY = Math.clamp(texY, 0, texture.getHeight() - 1);
+            // iterate through the columns from the right until the middle
+            double y1 = yCoords[v2], y2 = yCoords[v2];
+            for (int x = xCoords[v2]; x > xCoords[v1]; x--)
+            {
+                y1 -= m1;
+                y2 -= m2;
 
-                int fbX = (int)((x + (double)width / 2) * FRAMEBUFFER_SCALE);
-                int fbY = (int)((y + (double)height / 2) * FRAMEBUFFER_SCALE);
-                if (0 <= fbX && fbX < framebuffer.getWidth() &&
-                        0 <= fbY && fbY < framebuffer.getHeight())
+                // iterate through the pixels in the column
+                for (double y = y1; y >= y2; y--)
                 {
-                    framebuffer.setRGB(fbX, fbY, texture.getRGB(texX, texY));
+                    double[] uv = interpolateUV(x, (int) y, xCoords, yCoords, u, v);
+                    int texX = Math.clamp((int) (uv[0] * texture.getWidth()), 0, texture.getWidth() - 1);
+                    int texY = Math.clamp((int) (uv[1] * texture.getHeight()), 0, texture.getHeight() - 1);
+
+                    int fbX = (int) ((x + (double) width / 2) * resolution);
+                    int fbY = (int) ((-y + (double) height / 2) * resolution);
+                    if (fbX < 0 || framebuffer.getWidth() <= fbX) break;
+                    if (0 <= fbY && fbY < framebuffer.getHeight())
+                    {
+                        int color = texture.getRGB(texX, texY);
+                        // if the pixel is not transparent
+                        if (((color >> 24) & 0xFF) != 0)
+                            fbPixels[fbY * framebuffer.getWidth() + fbX] = color;
+                    }
                 }
             }
         }
     }
-
-    public static int getWidth() { return width; }
-    public static int getHeight() { return height; }
 
     private static double[] interpolateUV(int x, int y, int[] xPoints, int[] yPoints, double[] u, double[] v)
     {
@@ -272,35 +323,28 @@ public class Renderer
         return new double[] { uInterp, vInterp };
     }
 
-    private static boolean isInsideTriangle(int x, int y, int[] xPoints, int[] yPoints)
+    private static void updateFramebuffer()
     {
-        //source: chatgpt
+        // if the Renderer has not yet been initialized
+        if (width <= 0 || height <= 0) return;
 
-        int x1 = xPoints[0], y1 = yPoints[0];
-        int x2 = xPoints[1], y2 = yPoints[1];
-        int x3 = xPoints[2], y3 = yPoints[2];
-
-        // calculate cross product (sign determines on which side of the edge the point is)
-        int d1 = (x - x2) * (y1 - y2) - (y - y2) * (x1 - x2);
-        int d2 = (x - x3) * (y2 - y3) - (y - y3) * (x2 - x3);
-        int d3 = (x - x1) * (y3 - y1) - (y - y1) * (x3 - x1);
-
-        boolean sameSide = (d1 < 0 && d2 < 0 && d3 < 0) || (d1 > 0 && d2 > 0 && d3 > 0);
-        return sameSide;
+        framebuffer = new BufferedImage((int)(width * resolution), (int)(height * resolution), BufferedImage.TYPE_INT_ARGB);
+        fbPixels = ((DataBufferInt) framebuffer.getRaster().getDataBuffer()).getData();
     }
 
-    public static Color getShade(Color color, double shade)
-    {
-        //source: https://www.alibabacloud.com/blog/construct-a-simple-3d-rendering-engine-with-java_599599
-
-        double redLinear = Math.pow(color.getRed(), 2.2) * shade;
-        double greenLinear = Math.pow(color.getGreen(), 2.2) * shade;
-        double blueLinear = Math.pow(color.getBlue(), 2.2) * shade;
-
-        int red = (int) Math.pow(redLinear, 1 / 2.2);
-        int green = (int) Math.pow(greenLinear, 1 / 2.2);
-        int blue = (int) Math.pow(blueLinear, 1 / 2.2);
-
-        return new Color(red, green, blue);
-    }
+//    private static boolean isInsideTriangle(int x, int y, int[] xPoints, int[] yPoints)
+//    {
+//        //source: chatgpt
+//
+//        int x1 = xPoints[0], y1 = yPoints[0];
+//        int x2 = xPoints[1], y2 = yPoints[1];
+//        int x3 = xPoints[2], y3 = yPoints[2];
+//
+//        // calculate cross product (sign determines on which side of the edge the point is)
+//        int d1 = (x - x2) * (y1 - y2) - (y - y2) * (x1 - x2);
+//        int d2 = (x - x3) * (y2 - y3) - (y - y3) * (x2 - x3);
+//        int d3 = (x - x1) * (y3 - y1) - (y - y1) * (x3 - x1);
+//
+//        return (d1 < 0 && d2 < 0 && d3 < 0) || (d1 > 0 && d2 > 0 && d3 > 0);
+//    }
 }
