@@ -1,6 +1,8 @@
 package math;
 
-public class Vec3
+import java.io.Serializable;
+
+public class Vec3 implements Serializable
 {
     private double x, y, z;
 
@@ -38,6 +40,10 @@ public class Vec3
 
     public double dot(Vec3 other) { return x * other.getX() + y * other.getY() + z * other.getZ(); }
     public Vec3 cross(Vec3 other) { return new Vec3(y * other.getZ() - z * other.getY(), z * other.getX() - x * other.getZ(), x * other.getY() - y * other.getX()); }
+
+    public Vec2 xy() { return new Vec2(x, y); }
+    public Vec2 xz() { return new Vec2(x, z); }
+    public Vec2 yz() { return new Vec2(y, z); }
 
     public void print() { System.out.printf("%g %g %g\n", x, y, z); }
 }

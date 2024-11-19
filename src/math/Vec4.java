@@ -1,6 +1,8 @@
 package math;
 
-public class Vec4
+import java.io.Serializable;
+
+public class Vec4 implements Serializable
 {
     private double x, y, z, w;
 

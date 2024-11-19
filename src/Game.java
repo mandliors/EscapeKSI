@@ -19,8 +19,9 @@ public class Game extends Canvas implements Runnable
     private static final int MAX_FPS = 120;
     private static final double FRAME_TIME = 1.0 / MAX_FPS;
 
-    private Player player;
     private double dt = 0.0;
+
+    private Maze maze;
 
     public Game()
     {
@@ -45,16 +46,10 @@ public class Game extends Canvas implements Runnable
         Input.init(this);
         AssetManager.init();
 
-//        Maze maze = new Maze(Maze.defaultMaze);
-//        maze.saveToFile("res/dick.maze");
-//        maze.build();
+        maze = new Maze(Maze.defaultMaze, "res/prime.png", "res/ksi.png");
+        maze.saveToFile("res/dick.maze");
 
-        Maze maze = Maze.loadFromFile("res/dick.maze");
-        maze.build();
-
-        player = new Player(new Vec3(0.0, 2.01, 0.0), new Vec3(2.0, 0.0, 2.0), new Vec3(0.0, 0.0, -1.0), 45.0);
-        player.setCollidable(true);
-        World.addGameObject(player);
+//        maze = Maze.loadFromFile("res/dick.maze");
 
         new Thread(this).start();
     }
@@ -79,11 +74,14 @@ public class Game extends Canvas implements Runnable
                 Renderer.setResolution(Renderer.getResolution() / 0.8);
             else if (Input.isKeyPressed(KeyEvent.VK_DOWN))
                 Renderer.setResolution(Renderer.getResolution() * 0.8);
+            if (Input.isKeyPressed(KeyEvent.VK_SPACE))
+                Renderer.setWireframe(!Renderer.isWireframeEnabled());
             if (Input.isKeyPressed(KeyEvent.VK_ESCAPE))
                 System.exit(0);
 
             World.update(dt);
-            World.render(this, player.getCamera());
+            maze.update(dt);
+            World.render(this, maze.getPlayer().getCamera());
 
 
             dt = (System.nanoTime() - startTime) / 1_000_000_000.0;

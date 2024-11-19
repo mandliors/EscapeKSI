@@ -12,14 +12,12 @@ public class Player extends ColoredCube
 
     public Player(Vec3 position, Vec3 scale, Vec3 lookDirection, double fov)
     {
+        super(position, scale, new Vec3(0.0), new Color(0));
+
         camera = new Camera(fov, 0.01, 200.0);
         camera.setPosition(position);
         camera.lookAt(position.add(lookDirection));
         camera.setMouseLock(true);
-
-        this.position = position;
-        this.scale = scale;
-        this.color = new Color(0, 0, 0, 0);
     }
 
     public Camera getCamera() { return camera; }

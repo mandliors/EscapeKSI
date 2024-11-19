@@ -22,6 +22,7 @@ public class Renderer
     private static Canvas canvas;
 
     private static boolean backfaceCulling = true;
+    private static boolean wireframe = false;
 
     // framebuffer for the textures
     private static double resolution = 1.0;
@@ -37,12 +38,12 @@ public class Renderer
     static {
         PlainVertices = new double[]{
                 // bottom face
-                -0.5,  0.0, -0.5,  1.0, 1.0,
-                 0.5,  0.0, -0.5,  0.0, 1.0,
-                 0.5,  0.0,  0.5,  0.0, 0.0,
-                 0.5,  0.0,  0.5,  0.0, 0.0,
-                -0.5,  0.0,  0.5,  1.0, 0.0,
-                -0.5,  0.0, -0.5,  1.0, 1.0,
+                -0.5,  0.0, -0.5,  1.0, 0.0,
+                 0.5,  0.0, -0.5,  0.0, 0.0,
+                 0.5,  0.0,  0.5,  0.0, 1.0,
+                 0.5,  0.0,  0.5,  0.0, 1.0,
+                -0.5,  0.0,  0.5,  1.0, 1.0,
+                -0.5,  0.0, -0.5,  1.0, 0.0,
                 // top face
                  0.5,  0.0,  0.5,  1.0, 1.0,
                  0.5,  0.0, -0.5,  1.0, 0.0,
@@ -129,6 +130,9 @@ public class Renderer
     public static void setBackfaceCulling(boolean value) { backfaceCulling = value; }
     public static boolean isBackfaceCullingEnabled() { return backfaceCulling; }
 
+    public static void setWireframe(boolean value) { wireframe = value; }
+    public static boolean isWireframeEnabled() { return wireframe; }
+
     public static void init(Canvas canvas)
     {
         Renderer.canvas = canvas;
@@ -141,8 +145,6 @@ public class Renderer
             }
         });
 
-        AssetManager.loadTexture("bg", "res/ksi.png");
-
         updateFramebuffer();
     }
 
@@ -152,13 +154,6 @@ public class Renderer
 
         // clear background
         Arrays.fill(fbPixels, 0xFF000000);
-
-        // draw KSI bg
-        AffineTransform transform = new AffineTransform();
-        transform.shear(Math.cos(System.currentTimeMillis() / 179.3), Math.sin(System.currentTimeMillis() / 1311.0));
-        transform.scale(canvas.getWidth() / (double) AssetManager.getTexture("bg").get().getWidth() * resolution, (double)canvas.getHeight() / AssetManager.getTexture("bg").get().getHeight() * resolution);
-        transform.translate(100 -(int)(Math.pow(Math.sin(System.currentTimeMillis() / 1000.0),2.0) * 300), 0);
-        fbG2d.drawImage(AssetManager.getTexture("bg").get(), transform, null);
 
         // sort objects based on the priority first and then on the distance from camera (render least priority nearest last)
         Collections.sort(objects,
@@ -225,7 +220,10 @@ public class Renderer
         int[] yCoords = new int[] { (int) (trigon[0].getY() * scaleV * resolution), (int) (trigon[1].getY() * scaleV * resolution), (int) (trigon[2].getY() * scaleV * resolution) };
 
         fbG2d.setColor(color);
-        fbG2d.fillPolygon(xCoords, yCoords, 3);
+        if (wireframe)
+            fbG2d.drawPolygon(xCoords, yCoords, 3);
+        else
+            fbG2d.fillPolygon(xCoords, yCoords, 3);
     }
 
     public static void _drawTexturedTriangleImpl(BufferedImage texture, Vec3[] trigon, double[] u, double[] v)
@@ -304,6 +302,8 @@ public class Renderer
                         if (((color >> 24) & 0xFF) != 0)
                             fbPixels[fbY * framebuffer.getWidth() + fbX] = color;
                     }
+
+                    if (wireframe) y = y2 + 0.000001;
                 }
             }
         }
@@ -347,6 +347,8 @@ public class Renderer
                         if (((color >> 24) & 0xFF) != 0)
                             fbPixels[fbY * framebuffer.getWidth() + fbX] = color;
                     }
+
+                    if (wireframe) y = y2 + 0.000001;
                 }
             }
         }

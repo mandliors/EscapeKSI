@@ -1,8 +1,10 @@
 package math;
 
-public class Mat4
+import java.io.Serializable;
+
+public class Mat4 implements Serializable
 {
-    double data[];
+    double[] data;
 
     public Mat4() { this(0.0); }
     public Mat4(double v)
@@ -12,10 +14,10 @@ public class Mat4
             for (int j = 0; j < 4; j++)
                 set(i, j, i == j ? v : 0);
     }
-    public Mat4(double[] data) {
+    public Mat4(double[] data)
+    {
         this.data=new double[16];
-        for(int i=0;i<16;i++)
-            this.data[i]=data[i];
+        System.arraycopy(data, 0, this.data, 0, 16);
     }
 
     public double get(int i, int j) { return data[i * 4 + j]; }
