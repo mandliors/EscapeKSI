@@ -175,12 +175,21 @@ public class Renderer
         fbG2d.dispose();
         g2d.drawImage(framebuffer, 0, 0, canvas.getWidth(), canvas.getHeight(), null);
 
-        int i = 1;
+        int left = 1;
+        int right = 1;
         g2d.setFont(bigFont);
         for (RendererString string : rendererStrings)
         {
             g2d.setColor(string.color);
-            g2d.drawString(string.string, 10, i++ * 50);
+
+            if (string.left)
+                g2d.drawString(string.string, 10, left++ * 50);
+            else
+            {
+                FontMetrics metrics = g2d.getFontMetrics();
+                int textWidth = metrics.stringWidth(string.string);
+                g2d.drawString(string.string, getWidth() - textWidth -10, right++ * 50);
+            }
         }
         rendererStrings.clear();
     }

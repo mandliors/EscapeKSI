@@ -6,13 +6,14 @@ import assets.AssetManager;
 import coin.Coin;
 import collision.Collision;
 import gameobjects.shapes.ColoredCube;
+import rendering.Renderer;
+import rendering.RendererString;
 import world.World;
 import math.*;
 import gameobjects.shapes.ColoredPlain;
 import gameobjects.GameObject;
 
 import java.awt.*;
-import java.awt.desktop.SystemEventListener;
 import java.io.*;
 import java.util.*;
 import java.util.List;
@@ -73,6 +74,7 @@ public class Maze implements Serializable
     private transient List<Coin> coins;
     private transient Player player;
     private transient Enemy enemy;
+    private transient int maxCoinCount;
 
     private final int MAZE_SIZE;
     private Color wallColor = new Color(191, 172, 44);
@@ -178,6 +180,12 @@ public class Maze implements Serializable
             else if (enemyCell.x > nextCell.x)
                 enemy.setMoveDirection(Enemy.MoveDirection.LEFT);
         }
+
+        Renderer.addString(new RendererString(
+                String.format("Primes: %d/%d", maxCoinCount - coins.size(), maxCoinCount),
+                Color.YELLOW,
+                false
+        ));
     }
 
     public void saveToFile(String path)
@@ -244,6 +252,7 @@ public class Maze implements Serializable
         walls = new ArrayList<>();
         floorAndCeiling = new ArrayList<>();
         coins = new ArrayList<>();
+        maxCoinCount = 0;
 
         secondsAfterLastPathfind = 0.0;
 
@@ -332,6 +341,7 @@ public class Maze implements Serializable
                 }
             }
         }
+        maxCoinCount = coins.size();
     }
 
     public void destroy()

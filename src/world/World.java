@@ -38,8 +38,8 @@ public class World
     {
         Graphics2D g2d = (Graphics2D) canvas.getBufferStrategy().getDrawGraphics();
 
-        Renderer.addString(new RendererString(String.format("FPS: %d", (int)(1.0 / dt)), Color.GREEN));
-        Renderer.addString(new RendererString(String.format("Res: %d%%", (int)(100 * Renderer.getResolution())), Color.GREEN));
+        Renderer.addString(new RendererString(String.format("FPS: %d", (int)(1.0 / dt)), Color.GREEN, true));
+        Renderer.addString(new RendererString(String.format("Res: %d%%", (int)(100 * Renderer.getResolution())), Color.GREEN, true));
 
         Renderer.render(g2d, camera, gameObjects);
 
