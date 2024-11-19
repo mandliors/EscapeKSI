@@ -46,10 +46,10 @@ public class Game extends Canvas implements Runnable
         Input.init(this);
         AssetManager.init();
 
-        maze = new Maze(Maze.defaultMaze, "res/prime.png", "res/ksi.png");
-        maze.saveToFile("res/dick.maze");
+//        maze = new Maze(Maze.defaultMaze, "res/prime.png", "res/ksi.png");
+//        maze.saveToFile("res/dick.maze");
 
-//        maze = Maze.loadFromFile("res/dick.maze");
+        maze = Maze.loadFromFile("res/dick.maze");
 
         new Thread(this).start();
     }

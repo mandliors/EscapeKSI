@@ -30,7 +30,7 @@ public class Camera
         this.up = new Vec3(0.0, 1.0, 0.0);
         this.yaw = this.pitch = 0.0;
         this.moveSpeed = 10.0;
-        this.mouseSensitivity = 0.1;
+        this.mouseSensitivity = 0.06;
         this.projection = Meth.perspective(fov, (double)Renderer.getWidth() / Renderer.getHeight(), nearPlain, farPlain);
         //this.projection = Math.Meth.orthographic(-10, 10, 10, -10, 0, 10);
 

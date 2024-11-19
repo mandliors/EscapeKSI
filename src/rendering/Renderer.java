@@ -1,16 +1,12 @@
 package rendering;
 
-import assets.*;
 import gameobjects.GameObject;
-import gameobjects.shapes.ColoredCube;
-import gameobjects.shapes.ColoredGameObject;
 import math.Meth;
 import math.Vec3;
 
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.util.*;
@@ -23,6 +19,10 @@ public class Renderer
 
     private static boolean backfaceCulling = true;
     private static boolean wireframe = false;
+
+    // strings to render
+    private static final Font bigFont = new Font("Monospaced", Font.BOLD, 40);
+    private static List<RendererString> rendererStrings;
 
     // framebuffer for the textures
     private static double resolution = 1.0;
@@ -145,6 +145,8 @@ public class Renderer
             }
         });
 
+        rendererStrings = new ArrayList<>();
+
         updateFramebuffer();
     }
 
@@ -172,6 +174,15 @@ public class Renderer
         // draw the framebuffer
         fbG2d.dispose();
         g2d.drawImage(framebuffer, 0, 0, canvas.getWidth(), canvas.getHeight(), null);
+
+        int i = 1;
+        g2d.setFont(bigFont);
+        for (RendererString string : rendererStrings)
+        {
+            g2d.setColor(string.color);
+            g2d.drawString(string.string, 10, i++ * 50);
+        }
+        rendererStrings.clear();
     }
 
     public static void drawTriangle(Vec3[] trigon, Color color)
@@ -210,6 +221,8 @@ public class Renderer
 
         _drawTexturedTriangleImpl(texture, trigon, u, v);
     }
+
+    public static void addString(RendererString string) { rendererStrings.add(string); }
 
     public static void _drawTriangleImpl(Vec3[] trigon, Color color)
     {
@@ -382,20 +395,4 @@ public class Renderer
         framebuffer = new BufferedImage((int)(canvas.getWidth() * resolution), (int)(canvas.getHeight() * resolution), BufferedImage.TYPE_INT_ARGB);
         fbPixels = ((DataBufferInt) framebuffer.getRaster().getDataBuffer()).getData();
     }
-
-//    private static boolean isInsideTriangle(int x, int y, int[] xPoints, int[] yPoints)
-//    {
-//        //source: chatgpt
-//
-//        int x1 = xPoints[0], y1 = yPoints[0];
-//        int x2 = xPoints[1], y2 = yPoints[1];
-//        int x3 = xPoints[2], y3 = yPoints[2];
-//
-//        // calculate cross product (sign determines on which side of the edge the point is)
-//        int d1 = (x - x2) * (y1 - y2) - (y - y2) * (x1 - x2);
-//        int d2 = (x - x3) * (y2 - y3) - (y - y3) * (x2 - x3);
-//        int d3 = (x - x1) * (y3 - y1) - (y - y1) * (x3 - x1);
-//
-//        return (d1 < 0 && d2 < 0 && d3 < 0) || (d1 > 0 && d2 > 0 && d3 > 0);
-//    }
 }

@@ -7,6 +7,7 @@ import gameobjects.shapes.ColoredGameObject;
 import input.Input;
 import rendering.Camera;
 import rendering.Renderer;
+import rendering.RendererString;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -17,7 +18,6 @@ public class World
 {
     private static final List<GameObject> gameObjects = new ArrayList<>();
 
-    private static final Font bigFont = new Font("Monospaced", Font.BOLD, 40);
     private static double dt = 0.0;
 
     public static void addGameObject(GameObject obj) { gameObjects.add(obj); }
@@ -38,12 +38,10 @@ public class World
     {
         Graphics2D g2d = (Graphics2D) canvas.getBufferStrategy().getDrawGraphics();
 
-        Renderer.render(g2d, camera, gameObjects);
+        Renderer.addString(new RendererString(String.format("FPS: %d", (int)(1.0 / dt)), Color.GREEN));
+        Renderer.addString(new RendererString(String.format("Res: %d%%", (int)(100 * Renderer.getResolution())), Color.GREEN));
 
-        g2d.setColor(Color.GREEN);
-        g2d.setFont(bigFont);
-        g2d.drawString(String.format("FPS: %d", (int)(1.0 / dt)), 10, 50);
-        g2d.drawString(String.format("Res: %d%%", (int)(100 * Renderer.getResolution())), 10, 100);
+        Renderer.render(g2d, camera, gameObjects);
 
         g2d.dispose();
         canvas.getBufferStrategy().show();

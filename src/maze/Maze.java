@@ -12,6 +12,7 @@ import gameobjects.shapes.ColoredPlain;
 import gameobjects.GameObject;
 
 import java.awt.*;
+import java.awt.desktop.SystemEventListener;
 import java.io.*;
 import java.util.*;
 import java.util.List;
@@ -151,7 +152,7 @@ public class Maze implements Serializable
         Cell enemyCell = pos2Cell(enemy.getPosition().xz());
         Cell playerCell = pos2Cell(player.getPosition().xz());
         if (enemyCell.equals(playerCell))
-            ; // TODO: implement game over
+            gameOver();
         else if ((secondsAfterLastPathfind += dt) > PATHFIND_DELTA_IN_SECONDS)
         {
             secondsAfterLastPathfind -= PATHFIND_DELTA_IN_SECONDS;
@@ -161,7 +162,11 @@ public class Maze implements Serializable
             // no path
             if (path == null) return;
             // game over
-            if (path.isEmpty()) return; // TODO: implement game over
+            if (path.isEmpty())
+            {
+                gameOver();
+                return;
+            }
 
             Cell nextCell = path.get(1);
             if (enemyCell.y > nextCell.y)
@@ -241,9 +246,6 @@ public class Maze implements Serializable
         coins = new ArrayList<>();
 
         secondsAfterLastPathfind = 0.0;
-
-        for (Cell cell : pathfindInMaze(new Cell(1, 1), new Cell(5, 4)))
-            System.out.printf("(%d, %d)\n", cell.x, cell.y);
 
         // add the walls for rendering
         double startPos = -MAZE_SIZE / 2.0 * CELL_SIZE + CELL_SIZE / 2.0;
@@ -339,6 +341,12 @@ public class Maze implements Serializable
         coins.forEach(World::removeGameObject);
         World.removeGameObject(player);
         World.removeGameObject(enemy);
+    }
+
+    private void gameOver()
+    {
+        destroy();
+        build();
     }
 
     private List<Cell> pathfindInMaze(Cell start, Cell end)
