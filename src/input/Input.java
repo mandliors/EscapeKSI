@@ -1,5 +1,6 @@
 package input;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -9,33 +10,26 @@ import java.util.Arrays;
 
 public class Input
 {
-    // canvas on which the input is received
-    private static Canvas canvas;
-
     private static final boolean[] previousKeyboardState = new boolean[KeyEvent.KEY_LAST + 1];
     private static final boolean[] previousMouseButtonState = new boolean[MouseEvent.BUTTON3 + 1];
     private static final boolean[] keyboardState = new boolean[KeyEvent.KEY_LAST + 1];
     private static final boolean[] mouseButtonState = new boolean[MouseEvent.BUTTON3 + 1];
 
-    static {
+    public static void init(JPanel panel) throws NullPointerException
+    {
         Arrays.fill(previousKeyboardState, false);
         Arrays.fill(previousMouseButtonState, false);
         Arrays.fill(keyboardState, false);
         Arrays.fill(mouseButtonState, false);
-    }
 
-    public static void init(Canvas canvas) throws NullPointerException
-    {
-        Input.canvas = canvas;
-
-        canvas.requestFocus();
-        canvas.addKeyListener(new KeyAdapter() {
+        panel.requestFocus();
+        panel.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) { if (e.getKeyCode() < keyboardState.length) keyboardState[e.getKeyCode()] = true; }
             @Override
             public void keyReleased(KeyEvent e) { if (e.getKeyCode() < keyboardState.length) keyboardState[e.getKeyCode()] = false; }
         });
-        canvas.addMouseListener(new MouseAdapter() {
+        panel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) { if (e.getButton() < mouseButtonState.length) mouseButtonState[e.getButton()] = true; }
             @Override
@@ -61,6 +55,4 @@ public class Input
     // is it being held?
     public static boolean isKeyDown(int key) { return keyboardState[key]; }
     public static boolean isMouseButtonDown(int button) { return button < mouseButtonState.length && mouseButtonState[button]; }
-
-    public static Point getMousePosition() { return canvas.getMousePosition(); }
 }

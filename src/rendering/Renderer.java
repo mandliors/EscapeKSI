@@ -16,12 +16,13 @@ public class Renderer
 {
     // target canvas for the rendering
     private static Canvas canvas;
+    private static List<GameObject> gameObjects;
 
     private static boolean backfaceCulling = true;
     private static boolean wireframe = false;
 
     // strings to render
-    private static final Font bigFont = new Font("Monospaced", Font.BOLD, 40);
+    private static final Font bigFont = new Font(Font.MONOSPACED, Font.BOLD, 40);
     private static List<RendererString> rendererStrings;
 
     // framebuffer for the textures
@@ -145,12 +146,17 @@ public class Renderer
             }
         });
 
+        gameObjects = new ArrayList<>();
         rendererStrings = new ArrayList<>();
 
         updateFramebuffer();
     }
 
-    public static void render(Graphics2D g2d, Camera camera, List<GameObject> objects)
+    public static void addGameObject(GameObject gameObject) { gameObjects.add(gameObject); }
+    public static void removeGameObject(GameObject gameObject) { gameObjects.remove(gameObject); }
+    public static void clearGameObjects() { gameObjects.clear(); }
+
+    public static void render(Graphics2D g2d, Camera camera)
     {
         fbG2d = framebuffer.createGraphics();
 
@@ -158,7 +164,7 @@ public class Renderer
         Arrays.fill(fbPixels, 0xFF000000);
 
         // sort objects based on the priority first and then on the distance from camera (render least priority nearest last)
-        Collections.sort(objects,
+        Collections.sort(gameObjects,
                 Comparator.comparing(GameObject::getRenderingPriority).thenComparing(
                 Comparator.comparingDouble(
                         (GameObject o) -> (o.getPosition().subtract(camera.getPosition())).getLengthSquared()).reversed()
@@ -168,7 +174,7 @@ public class Renderer
         // draw objects to the framebuffer
         fbG2d.translate(canvas.getWidth() / 2 * resolution, canvas.getHeight() / 2 * resolution);
         fbG2d.scale(1.0, -1.0);
-        for (GameObject obj : objects)
+        for (GameObject obj : gameObjects)
             obj.render(camera);
 
         // draw the framebuffer
@@ -192,6 +198,7 @@ public class Renderer
             }
         }
         rendererStrings.clear();
+        gameObjects.clear();
     }
 
     public static void drawTriangle(Vec3[] trigon, Color color)

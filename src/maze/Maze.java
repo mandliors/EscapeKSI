@@ -6,14 +6,17 @@ import assets.AssetManager;
 import coin.Coin;
 import collision.Collision;
 import gameobjects.shapes.ColoredCube;
+import input.Input;
+import leaderboard.Leaderboard;
 import rendering.Renderer;
 import rendering.RendererString;
-import world.World;
 import math.*;
 import gameobjects.shapes.ColoredPlain;
 import gameobjects.GameObject;
 
+import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.io.*;
 import java.util.*;
 import java.util.List;
@@ -75,6 +78,7 @@ public class Maze implements Serializable
     private transient Player player;
     private transient Enemy enemy;
     private transient int maxCoinCount;
+    private transient double time;
 
     private final int MAZE_SIZE;
     private Color wallColor = new Color(191, 172, 44);
@@ -112,8 +116,20 @@ public class Maze implements Serializable
         build();
     }
 
-    public void update(double dt)
+    public boolean update(double dt)
     {
+        // go back to the main menu
+        if (Input.isKeyPressed(KeyEvent.VK_ESCAPE))
+            return false;
+
+        // update gameobjects
+        walls.forEach((var w) -> w.update(dt));
+        floorAndCeiling.forEach((var w) -> w.update(dt));
+        coins.forEach((var w) -> w.update(dt));
+        player.update(dt);
+        enemy.update(dt);
+        time += dt;
+
         // check for collisions with walls
         Collision collision = null;
         for (GameObject wall : walls)
@@ -147,7 +163,22 @@ public class Maze implements Serializable
         {
             GameObject coin = c.getGameObject();
             coins.remove(coin);
-            World.removeGameObject(coin);
+
+            // all coins have been collected
+            if (coins.isEmpty())
+            {
+                String input = JOptionPane.showInputDialog(
+                        null,
+                        "Enter your name:",
+                        "Save Result",
+                        JOptionPane.QUESTION_MESSAGE
+                );
+                if (input != null)
+                {
+                    Leaderboard.addRecord(new Leaderboard.Record(input, time));
+                    return false;
+                }
+            }
         }
 
         // check player-enemy collision, and update enemy direction if 1 second has passed
@@ -162,12 +193,12 @@ public class Maze implements Serializable
             List<Cell> path = pathfindInMaze(enemyCell, playerCell);
 
             // no path
-            if (path == null) return;
+            if (path == null) return true;
             // game over
             if (path.isEmpty())
             {
                 gameOver();
-                return;
+                return true;
             }
 
             Cell nextCell = path.get(1);
@@ -186,6 +217,17 @@ public class Maze implements Serializable
                 Color.YELLOW,
                 false
         ));
+
+        return true;
+    }
+
+    public void render()
+    {
+        walls.forEach(Renderer::addGameObject);
+        floorAndCeiling.forEach(Renderer::addGameObject);
+        coins.forEach(Renderer::addGameObject);
+        Renderer.addGameObject(player);
+        Renderer.addGameObject(enemy);
     }
 
     public void saveToFile(String path)
@@ -232,7 +274,6 @@ public class Maze implements Serializable
         if (!Meth.isBetween(x, 0, MAZE_SIZE - 1) || !Meth.isBetween(y, 0, MAZE_SIZE - 1)) return;
 
         maze[y * MAZE_SIZE + x] = type;
-        destroy();
         build();
     }
 
@@ -253,6 +294,7 @@ public class Maze implements Serializable
         floorAndCeiling = new ArrayList<>();
         coins = new ArrayList<>();
         maxCoinCount = 0;
+        time = 0.0;
 
         secondsAfterLastPathfind = 0.0;
 
@@ -265,7 +307,6 @@ public class Maze implements Serializable
                 if (maze[i * MAZE_SIZE + j] == CellType.WALL)
                 {
                     GameObject wall = new ColoredCube(new Vec3(startPos + j * CELL_SIZE, WALL_HEIGHT / 2, startPos + i * CELL_SIZE), new Vec3(CELL_SIZE, WALL_HEIGHT, CELL_SIZE), new Vec3(0.0), wallColor);
-                    World.addGameObject(wall);
                     walls.add(wall);
                 }
             }
@@ -280,13 +321,11 @@ public class Maze implements Serializable
                 // floor cell
                 GameObject floor = new ColoredPlain(new Vec3(startPos + j * CELL_SIZE * FLOOR_CELL_SCALE, 0.0, startPos + i * CELL_SIZE * FLOOR_CELL_SCALE), new Vec3(CELL_SIZE * FLOOR_CELL_SCALE, 0.0, CELL_SIZE * FLOOR_CELL_SCALE), new Vec3(0.0), floorColor);
                 floor.setRenderingPriority(0);
-                World.addGameObject(floor);
                 floorAndCeiling.add(floor);
 
                 // ceiling cell
                 GameObject ceiling = new ColoredPlain(new Vec3(startPos + j * CELL_SIZE * FLOOR_CELL_SCALE, WALL_HEIGHT, startPos + i * CELL_SIZE * FLOOR_CELL_SCALE), new Vec3(CELL_SIZE * FLOOR_CELL_SCALE, 0.0, CELL_SIZE * FLOOR_CELL_SCALE), new Vec3(0.0), ceilingColor);
                 ceiling.setRenderingPriority(0);
-                World.addGameObject(ceiling);
                 floorAndCeiling.add(ceiling);
             }
         }
@@ -304,12 +343,11 @@ public class Maze implements Serializable
                             WALL_HEIGHT / 2.0 + 0.1,
                             -(MAZE_SIZE - 1) * CELL_SIZE / 2.0 + i * CELL_SIZE
                     ), new Vec3(
-                            CELL_SIZE / 2.0, 0.0, CELL_SIZE / 2.0
+                            CELL_SIZE / 2.0, WALL_HEIGHT / 2.0, CELL_SIZE / 2.0
                     ), new Vec3(0.0, 0.0, -1.0),
                             45.0
                     );
                     player.setCollidable(true);
-                    World.addGameObject(player);
                 }
                 else if (cellType == CellType.COIN)
                 {
@@ -322,7 +360,6 @@ public class Maze implements Serializable
                     ),
                         "_maze_coin"
                     );
-                    World.addGameObject(coin);
                     coins.add(coin);
                 }
                 else if (cellType == CellType.ENEMY)
@@ -337,25 +374,14 @@ public class Maze implements Serializable
                 "_maze_enemy",
                 4.0
                     );
-                    World.addGameObject(enemy);
                 }
             }
         }
         maxCoinCount = coins.size();
     }
 
-    public void destroy()
-    {
-        walls.forEach(World::removeGameObject);
-        floorAndCeiling.forEach(World::removeGameObject);
-        coins.forEach(World::removeGameObject);
-        World.removeGameObject(player);
-        World.removeGameObject(enemy);
-    }
-
     private void gameOver()
     {
-        destroy();
         build();
     }
 

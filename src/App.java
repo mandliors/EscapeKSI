@@ -1,0 +1,120 @@
+import leaderboard.Leaderboard;
+import screens.GameScreen;
+import screens.LeaderboardScreen;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+public class App extends JFrame
+{
+    enum GameState { MAIN_MENU, GAME, LEADERBOARD }
+
+    private static final int WIDTH = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
+    private static final int HEIGHT = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
+
+    GameState gameState;
+    JPanel mainPanel;
+
+    public App()
+    {
+        super("Escape KSI");
+        setSize(WIDTH, HEIGHT - 100);
+        setResizable(false);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        Leaderboard.loadFromFile("res/leaderboard.dat");
+
+//        Leaderboard.addRecord(new Leaderboard.Record("dskjsdf", 423.32423));
+//        Leaderboard.addRecord(new Leaderboard.Record("jshdf", 763.3434));
+//        Leaderboard.addRecord(new Leaderboard.Record("llksdf", 952.43));
+//        Leaderboard.addRecord(new Leaderboard.Record("lldjksf", 123.4556));
+
+        JFrame thisFrame = this;
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                Leaderboard.saveToFile("res/leaderboard.dat");
+                System.exit(0);
+            }
+        });
+
+        // panel for the UI components
+        mainPanel = new JPanel();
+        mainPanel.setBackground(new Color(40, 40, 40));
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+
+        // create buttons
+        JButton gameButton = createDarkButton("Start Game");
+        JButton settingsButton = createDarkButton("Leaderboard");
+        JButton exitButton = createDarkButton("Exit");
+
+        // add action listeners
+        gameButton.addActionListener(e -> gameState = GameState.GAME );
+        settingsButton.addActionListener(e -> gameState = GameState.LEADERBOARD );
+        exitButton.addActionListener(e -> dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING)));
+
+        // add buttons to the panel with spacing
+        Dimension spacing = new Dimension(0, 40);
+        mainPanel.add(Box.createVerticalGlue());
+        mainPanel.add(gameButton);
+        mainPanel.add(Box.createRigidArea(spacing));
+        mainPanel.add(settingsButton);
+        mainPanel.add(Box.createRigidArea(spacing));
+        mainPanel.add(exitButton);
+        mainPanel.add(Box.createVerticalGlue());
+
+        add(mainPanel);
+        setVisible(true);
+
+        gameState = GameState.MAIN_MENU;
+        display();
+    }
+
+    public void display()
+    {
+        while (true)
+        {
+            switch (gameState)
+            {
+                case MAIN_MENU -> {
+                    try { Thread.sleep(100); } catch (Exception e) { e.printStackTrace(); }
+                }
+                case GAME -> {
+                    GameScreen gameScreen = new GameScreen(this, WIDTH, HEIGHT);
+                    gameScreen.display();
+                }
+                case LEADERBOARD -> {
+                    LeaderboardScreen leaderboardScreen = new LeaderboardScreen(this, WIDTH, HEIGHT);
+                    leaderboardScreen.display();
+                }
+            }
+            gameState = GameState.MAIN_MENU;
+            setContentPane(mainPanel);
+        }
+    }
+
+    private JButton createDarkButton(String text)
+    {
+        JButton button = new JButton(text);
+
+        button.setBackground(new Color(40, 40, 40));
+        button.setForeground(new Color(220, 220, 220));
+        button.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+                BorderFactory.createEmptyBorder(20, 60, 20, 60)
+        ));
+        button.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 40));
+        button.setFocusPainted(false);
+        button.setContentAreaFilled(false);
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        return button;
+    }
+
+    public static void main(String[] args)
+    {
+        new App();
+    }
+}
