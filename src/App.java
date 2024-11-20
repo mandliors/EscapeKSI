@@ -47,12 +47,12 @@ public class App extends JFrame
 
         // create buttons
         JButton gameButton = createDarkButton("Start Game");
-        JButton settingsButton = createDarkButton("Leaderboard");
+        JButton leaderboard = createDarkButton("Leaderboard");
         JButton exitButton = createDarkButton("Exit");
 
         // add action listeners
         gameButton.addActionListener(e -> gameState = GameState.GAME );
-        settingsButton.addActionListener(e -> gameState = GameState.LEADERBOARD );
+        leaderboard.addActionListener(e -> gameState = GameState.LEADERBOARD );
         exitButton.addActionListener(e -> dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING)));
 
         // add buttons to the panel with spacing
@@ -60,7 +60,7 @@ public class App extends JFrame
         mainPanel.add(Box.createVerticalGlue());
         mainPanel.add(gameButton);
         mainPanel.add(Box.createRigidArea(spacing));
-        mainPanel.add(settingsButton);
+        mainPanel.add(leaderboard);
         mainPanel.add(Box.createRigidArea(spacing));
         mainPanel.add(exitButton);
         mainPanel.add(Box.createVerticalGlue());
@@ -69,6 +69,7 @@ public class App extends JFrame
         setVisible(true);
 
         gameState = GameState.MAIN_MENU;
+
         display();
     }
 
@@ -79,20 +80,28 @@ public class App extends JFrame
             switch (gameState)
             {
                 case MAIN_MENU -> {
-                    try { Thread.sleep(100); } catch (Exception e) { e.printStackTrace(); }
+                    try { Thread.sleep(10); } catch (Exception e) { e.printStackTrace(); }
                 }
                 case GAME -> {
                     GameScreen gameScreen = new GameScreen(this, WIDTH, HEIGHT);
                     gameScreen.display();
+                    backToMainMenu();
                 }
                 case LEADERBOARD -> {
                     LeaderboardScreen leaderboardScreen = new LeaderboardScreen(this, WIDTH, HEIGHT);
                     leaderboardScreen.display();
+                    backToMainMenu();
                 }
             }
-            gameState = GameState.MAIN_MENU;
-            setContentPane(mainPanel);
         }
+    }
+
+    private void backToMainMenu()
+    {
+        gameState = GameState.MAIN_MENU;
+        setContentPane(mainPanel);
+        revalidate();
+        repaint();
     }
 
     private JButton createDarkButton(String text)
