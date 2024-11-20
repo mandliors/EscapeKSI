@@ -111,7 +111,7 @@ public class Meth
         /*
            basis transformation from world->view is done using the inverse of the view->world matrix
            the view->world matrix is (b1|b2|b3|e4) where bi-s are the basis vectors, e4 is (0,0,0,1)
-           to get world->view from view->world, we just have to get the inverse, which is just the
+           to get world->view from view->world, we have to calculate the inverse, which is just the
            transpose of the matrix, because it is orthonormal (columns are orthogonal and normalized)
         */
         Mat4 worldToView = new Mat4(new double[] {
@@ -127,10 +127,7 @@ public class Meth
         return worldToView;
     }
 
-    public static boolean isBetween(int v, int min, int max)
-    {
-        return min <= v && v <= max;
-    }
+    public static boolean isBetween(int v, int min, int max) { return min <= v && v <= max; }
     public static boolean isBetween(double v, double min, double max)
     {
         return min <= v && v <= max;
