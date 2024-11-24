@@ -69,7 +69,7 @@ public class Maze implements Serializable
     private static final double CELL_SIZE = 4;
     private static final double WALL_HEIGHT = 4;
     private static final double FLOOR_CELL_SCALE = 0.5;
-    private static final double PATHFIND_DELTA_IN_SECONDS = 0.2;
+    private static final double MAX_DIST_EPSILON = 0.1;
 
     private final CellType[] maze;
     private final String coinTexturePath;
@@ -81,13 +81,12 @@ public class Maze implements Serializable
     private transient Enemy enemy;
     private transient int maxCoinCount;
     private transient double time;
+    private transient Cell enemyTargetCell;
 
     private final int MAZE_SIZE;
     private Color wallColor = new Color(191, 172, 44);
     private Color floorColor = new Color(77, 67, 23);
     private Color ceilingColor = new Color(77, 67, 23);
-
-    private double secondsAfterLastPathfind;
 
     public Maze(String mazeString, String coinTexturePath, String enemyTexturePath)
     {
@@ -96,7 +95,7 @@ public class Maze implements Serializable
         this.coinTexturePath = coinTexturePath;
         this.enemyTexturePath = enemyTexturePath;
 
-        // if the main.java.maze is invalid, use the default main.java.maze
+        // if the maze is invalid, use the default maze
         if (mazeString.length() != MAZE_SIZE * MAZE_SIZE)
             mazeString = defaultMaze;
 
@@ -124,7 +123,7 @@ public class Maze implements Serializable
         if (Input.isKeyPressed(KeyEvent.VK_ESCAPE))
             return false;
 
-        // update main.java.gameobjects
+        // update gameobjects
         walls.forEach((var w) -> w.update(dt));
         floorAndCeiling.forEach((var w) -> w.update(dt));
         coins.forEach((var w) -> w.update(dt));
@@ -150,7 +149,7 @@ public class Maze implements Serializable
             }
         }
 
-        // check for main.java.collision with coins
+        // check for collision with coins
         List<Collision> collisions = new ArrayList<>();
         for (GameObject coin : coins)
             if (Collision.collideWith(player, coin))
@@ -183,15 +182,14 @@ public class Maze implements Serializable
             }
         }
 
-        // check player-enemy main.java.collision, and update enemy direction if 1 second has passed
+        // check player-enemy collision, and update enemy direction if 1 second has passed
         Cell enemyCell = pos2Cell(enemy.getPosition().xz());
         Cell playerCell = pos2Cell(player.getPosition().xz());
         if (enemyCell.equals(playerCell))
             gameOver();
-        else if ((secondsAfterLastPathfind += dt) > PATHFIND_DELTA_IN_SECONDS)
+        // close enough to target cell, time to find the new target cell
+        else if (enemy.getPosition().xz().distance(cell2Pos(enemyTargetCell)) < MAX_DIST_EPSILON)
         {
-            secondsAfterLastPathfind -= PATHFIND_DELTA_IN_SECONDS;
-
             List<Cell> path = pathfindInMaze(enemyCell, playerCell);
 
             // no path
@@ -203,14 +201,14 @@ public class Maze implements Serializable
                 return true;
             }
 
-            Cell nextCell = path.get(1);
-            if (enemyCell.y > nextCell.y)
+            enemyTargetCell = path.get(1);
+            if (enemyCell.y > enemyTargetCell.y)
                 enemy.setMoveDirection(Enemy.MoveDirection.UP);
-            else if (enemyCell.x < nextCell.x)
+            else if (enemyCell.x < enemyTargetCell.x)
                 enemy.setMoveDirection(Enemy.MoveDirection.RIGHT);
-            else if (enemyCell.y < nextCell.y)
+            else if (enemyCell.y < enemyTargetCell.y)
                 enemy.setMoveDirection(Enemy.MoveDirection.DOWN);
-            else if (enemyCell.x > nextCell.x)
+            else if (enemyCell.x > enemyTargetCell.x)
                 enemy.setMoveDirection(Enemy.MoveDirection.LEFT);
         }
 
@@ -298,9 +296,7 @@ public class Maze implements Serializable
         maxCoinCount = 0;
         time = 0.0;
 
-        secondsAfterLastPathfind = 0.0;
-
-        // add the walls for main.java.rendering
+        // add the walls for rendering
         double startPos = -MAZE_SIZE / 2.0 * CELL_SIZE + CELL_SIZE / 2.0;
         for (int i = 0; i < MAZE_SIZE; i++)
         {
@@ -314,7 +310,7 @@ public class Maze implements Serializable
             }
         }
 
-        // add the ceiling and the floor for main.java.rendering
+        // add the ceiling and the floor for rendering
         startPos = -MAZE_SIZE / 2.0 * CELL_SIZE + CELL_SIZE / 2.0 * FLOOR_CELL_SCALE;
         for (int i = 0; i < MAZE_SIZE / FLOOR_CELL_SCALE; i++)
         {
@@ -332,7 +328,7 @@ public class Maze implements Serializable
             }
         }
 
-        // add player, coins and enemies
+        // add the player, coins and the enemy
         for (int i = 0; i < MAZE_SIZE; i++)
         {
             for (int j = 0; j < MAZE_SIZE; j++)
@@ -380,6 +376,7 @@ public class Maze implements Serializable
             }
         }
         maxCoinCount = coins.size();
+        enemyTargetCell = pos2Cell(enemy.getPosition().xz());
     }
 
     private void gameOver()

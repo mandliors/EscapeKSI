@@ -18,7 +18,10 @@ public class Vec2 implements Serializable
 
     public double getX() { return x; }
     public double getY() { return y; }
+    public double getLength() { return Math.sqrt(x * x + y * y); }
 
     public Vec2 add(Vec2 other) { return new Vec2(x + other.getX(), y + other.getY()); }
+    public Vec2 subtract(Vec2 other) { return new Vec2(x - other.getX(), y - other.getY()); }
     public Vec2 scale(double scalar) { return new Vec2(x * scalar, y * scalar); }
+    public double distance(Vec2 other) { return this.subtract(other).getLength(); }
 }

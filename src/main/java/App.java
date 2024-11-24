@@ -21,23 +21,19 @@ public class App extends JFrame
     public App()
     {
         super("Escape KSI");
-        setSize(WIDTH, HEIGHT - 100);
         setResizable(false);
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setLayout(new BorderLayout());
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setUndecorated(true);
 
-        Leaderboard.loadFromFile("res/main.java.leaderboard.dat");
-
-//        Leaderboard.addRecord(new Leaderboard.Record("dskjsdf", 423.32423));
-//        Leaderboard.addRecord(new Leaderboard.Record("jshdf", 763.3434));
-//        Leaderboard.addRecord(new Leaderboard.Record("llksdf", 952.43));
-//        Leaderboard.addRecord(new Leaderboard.Record("lldjksf", 123.4556));
+        Leaderboard.loadFromFile("res/leaderboard.dat");
 
         JFrame thisFrame = this;
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                Leaderboard.saveToFile("res/main.java.leaderboard.dat");
+                Leaderboard.saveToFile("res/leaderboard.dat");
                 System.exit(0);
             }
         });

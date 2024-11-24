@@ -19,10 +19,11 @@ public class LeaderboardScreen extends JPanel
         setSize(width, height);
         setLayout(new BorderLayout());
         setBackground(new Color(40, 40, 40));
+        setFocusable(false);
         parent.setContentPane(this);
 
-        // initialize main.java.input for this panel
-        Input.init(this);
+        // initialize input for this panel
+        Input.init(parent);
 
         // load the data
         List<Leaderboard.Record> records = Leaderboard.getRecords();
@@ -44,6 +45,7 @@ public class LeaderboardScreen extends JPanel
         table.setBorder(new EmptyBorder(20,20, 20, 20));
         table.setRowSelectionAllowed(false);
         table.setCellSelectionEnabled(false);
+        table.setFocusable(false);
 
         // setup table header
         JTableHeader header = table.getTableHeader();
@@ -72,7 +74,6 @@ public class LeaderboardScreen extends JPanel
         while (!Input.isKeyPressed(KeyEvent.VK_ESCAPE))
         {
             Input.update();
-            grabFocus();
 
             try { Thread.sleep(10); } catch (Exception e) { e.printStackTrace(); }
         }

@@ -14,21 +14,21 @@ public class Input
     private static final boolean[] keyboardState = new boolean[KeyEvent.KEY_LAST + 1];
     private static final boolean[] mouseButtonState = new boolean[MouseEvent.BUTTON3 + 1];
 
-    public static void init(JPanel panel) throws NullPointerException
+    public static void init(JFrame frame) throws NullPointerException
     {
         Arrays.fill(previousKeyboardState, false);
         Arrays.fill(previousMouseButtonState, false);
         Arrays.fill(keyboardState, false);
         Arrays.fill(mouseButtonState, false);
 
-        panel.requestFocus();
-        panel.addKeyListener(new KeyAdapter() {
+        frame.requestFocus();
+        frame.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) { if (e.getKeyCode() < keyboardState.length) keyboardState[e.getKeyCode()] = true; }
             @Override
             public void keyReleased(KeyEvent e) { if (e.getKeyCode() < keyboardState.length) keyboardState[e.getKeyCode()] = false; }
         });
-        panel.addMouseListener(new MouseAdapter() {
+        frame.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) { if (e.getButton() < mouseButtonState.length) mouseButtonState[e.getButton()] = true; }
             @Override

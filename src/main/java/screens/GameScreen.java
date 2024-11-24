@@ -13,6 +13,8 @@ import javax.sound.sampled.Clip;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class GameScreen extends JPanel
 {
@@ -30,11 +32,13 @@ public class GameScreen extends JPanel
     {
         setLayout(null);
         setSize(width, height);
+        setFocusable(false);
         parent.setContentPane(this);
 
         // canvas to render to
         canvas = new Canvas();
         canvas.setSize(width, height);
+        canvas.setFocusable(false);
         add(canvas);
 
         // double buffering
@@ -44,13 +48,13 @@ public class GameScreen extends JPanel
         Renderer.init(canvas);
         Renderer.setResolution(0.4);
         Renderer.setBackfaceCulling(true);
-        Input.init(this);
+        Input.init(parent);
         AssetManager.init();
 
         // load everything
         maze = new Maze(Maze.defaultMaze, "res/prime.png", "res/ksi.png");
-        maze.saveToFile("res/backrooms.main.java.maze");
-//        main.java.maze = Maze.loadFromFile("res/backrooms.main.java.maze");
+        maze.saveToFile("res/backrooms.maze");
+//      maze = Maze.loadFromFile("res/backrooms.maze");
         music = AssetManager.loadSound("music", "res/thick_of_it.wav");
 
         playing = true;
