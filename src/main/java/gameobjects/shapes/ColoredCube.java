@@ -11,10 +11,17 @@ import main.java.rendering.*;
 
 public class ColoredCube extends ColoredGameObject
 {
+    /**
+     * Creates a white unit-sized cube in the origin
+     */
     public ColoredCube()
     {
         this(new Vec3(0.0), new Vec3(1.0), new Vec3(0.0), Color.WHITE);
     }
+
+    /**
+     * Creates a colored cube with the given position, scale rotation and color
+     */
     public ColoredCube(Vec3 position, Vec3 scale, Vec3 rotation, Color color)
     {
         super(position, scale, rotation, color);
@@ -22,6 +29,12 @@ public class ColoredCube extends ColoredGameObject
     }
 
     public void update(double dt) { }
+
+    /**
+     * Renders the cube from the camera's point of view (faces are rendered in one call, not using the default algorithm where they would be split up into two triangles)
+     * This is important for shading
+     * @param camera From what pov the cube will be rendered
+     */
     public void render(Camera camera)
     {
         Mat4 viewProj = camera.getProjectionMatrix().multiply(camera.getViewMatrix());

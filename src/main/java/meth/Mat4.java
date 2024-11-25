@@ -4,9 +4,20 @@ import java.io.Serializable;
 
 public class Mat4 implements Serializable
 {
+    /**
+     * Matrix data
+     */
     double[] data;
 
+    /**
+     * Creates a zeroed out 4x4 matrix
+     */
     public Mat4() { this(0.0); }
+
+    /**
+     * Creates a 4x4 matrix where everything is zero, except the diagonal
+     * @param v The value in the diagonal
+     */
     public Mat4(double v)
     {
         data = new double[16];
@@ -14,15 +25,30 @@ public class Mat4 implements Serializable
             for (int j = 0; j < 4; j++)
                 set(i, j, i == j ? v : 0);
     }
+
+    /**
+     * Creates a 4x4 matrix using the given raw data
+     */
     public Mat4(double[] data)
     {
-        this.data=new double[16];
+        this.data = new double[16];
         System.arraycopy(data, 0, this.data, 0, 16);
     }
 
+    /**
+     * Returns the element at the given index
+     */
     public double get(int i, int j) { return data[i * 4 + j]; }
+
+    /**
+     * Sets the element at the given index
+     */
     public void set(int i, int j, double v) { data[i * 4 + j] = v; }
 
+    /**
+     * Adds two matrices together (does not modify them)
+     * @return The resulting matrix
+     */
     public Mat4 add(Mat4 other)
     {
         Mat4 res = new Mat4();
@@ -32,6 +58,10 @@ public class Mat4 implements Serializable
         return res;
     }
 
+    /**
+     * Multiplies matrices (does not modify them)
+     * @return The resulting matrix
+     */
     public Mat4 multiply(Mat4 other)
     {
         Mat4 res = new Mat4(0.0);
@@ -42,6 +72,10 @@ public class Mat4 implements Serializable
         return res;
     }
 
+    /**
+     * Multiplies a 4x4 matrix by a 4-dim vector (does not modify them)
+     * @return The resulting vector
+     */
     public Vec4 multiply(Vec4 vec)
     {
         return new Vec4(
@@ -52,6 +86,9 @@ public class Mat4 implements Serializable
         );
     }
 
+    /**
+     * Returns the transpose of the matrix (does not modify it)
+     */
     public Mat4 transpose()
     {
         Mat4 res = new Mat4();
@@ -61,6 +98,9 @@ public class Mat4 implements Serializable
         return res;
     }
 
+    /**
+     * Prints the matrix in a nice format
+     */
     public void print()
     {
         for (int i = 0; i < 4; i++)

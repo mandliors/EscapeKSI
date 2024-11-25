@@ -14,9 +14,18 @@ import main.java.rendering.*;
 
 public abstract class TexturedGameObject extends GameObject
 {
+    /**
+     * The vertices of the gameobject (will have to be set by derived classes)
+     */
     protected double[] vertices;
+    /**
+     * The name of the texture for the gameobject
+     */
     protected String textureName;
 
+    /**
+     * Creates a textured gameobject with the given position, scale, rotation and texture name
+     */
     public TexturedGameObject(Vec3 position, Vec3 scale, Vec3 rotation, String textureName)
     {
         translate(position);
@@ -27,7 +36,15 @@ public abstract class TexturedGameObject extends GameObject
         this.textureName = textureName;
     }
 
+    /**
+     * Does literally nothing, but had to be implemented
+     */
     public void update(double dt) { }
+
+    /**
+     * Renders the gameobject with the default algorithm
+     * @param camera The pov from where the gameobject will be rendered
+     */
     public void render(Camera camera)
     {
         Mat4 viewProj = camera.getProjectionMatrix().multiply(camera.getViewMatrix());

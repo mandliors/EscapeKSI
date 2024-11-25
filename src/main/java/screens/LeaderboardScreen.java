@@ -14,6 +14,9 @@ import java.util.List;
 
 public class LeaderboardScreen extends JPanel
 {
+    /**
+     * Creates a new leaderboard screen on the parent frame with the given dimensions
+     */
     public LeaderboardScreen(JFrame parent, int width, int height)
     {
         setSize(width, height);
@@ -21,9 +24,6 @@ public class LeaderboardScreen extends JPanel
         setBackground(new Color(40, 40, 40));
         setFocusable(false);
         parent.setContentPane(this);
-
-        // initialize input for this panel
-        Input.init(parent);
 
         // load the data
         List<Leaderboard.Record> records = Leaderboard.getRecords();
@@ -62,13 +62,18 @@ public class LeaderboardScreen extends JPanel
         JScrollPane tableScrollPane = new JScrollPane(table);
         tableScrollPane.setAlignmentX(Component.CENTER_ALIGNMENT);
         tableScrollPane.setBackground(new Color(40, 40, 40));
-
         add(tableScrollPane, BorderLayout.CENTER);
+
+        // initialize input for the parent
+        Input.init(parent);
 
         parent.revalidate();
         parent.repaint();
     }
 
+    /**
+     * Starts the main loop of the leaderboard panel
+     */
     public void display()
     {
         while (!Input.isKeyPressed(KeyEvent.VK_ESCAPE))

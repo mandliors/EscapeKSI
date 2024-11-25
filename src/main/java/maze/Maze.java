@@ -15,7 +15,9 @@ import main.java.rendering.Renderer;
 import main.java.rendering.RendererString;
 import main.java.gameobjects.shapes.ColoredPlain;
 import main.java.gameobjects.GameObject;
+import main.java.screens.GameScreen;
 
+import javax.sound.sampled.Clip;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -25,7 +27,14 @@ import java.util.List;
 
 public class Maze implements Serializable
 {
+    /**
+     * The types the cells can have
+     */
     public enum CellType { WALL, EMPTY, COIN, PLAYER, ENEMY }
+
+    /**
+     * Helper class for storing cells and comparing them
+     */
     private class Cell
     {
         public int x, y;
@@ -44,56 +53,152 @@ public class Maze implements Serializable
         public int hashCode() { return Objects.hash(x, y); }
     }
 
+    /**
+     * The default maze
+     */
     public static final String defaultMaze =
             "####################" +
-            "#0  ####          x#" +
-            "# #  x#    ###### ##" +
-            "# ##### ## #   #  ##" +
-            "# #   #  #x# #   #x#" +
-            "#   # ## ### ### # #" +
-            "#####     #  #   # #" +
-            "#   # ### # ## ### #" +
-            "# #   #   # #      #" +
-            "# ##### # # # ######" +
-            "#x  #x  #   # #    #" +
-            "### ### ## ## # ## #" +
-            "#   #       #   #  #" +
-            "# ### ##### ##### ##" +
-            "#     #   #        #" +
-            "# ##### # ### ## # #" +
-            "# #     #     #  # #" +
-            "# ## # #### # # ## #" +
-            "#o   #      #   #x #" +
+            "#                  #" +
+            "#                  #" +
+            "#                  #" +
+            "#                  #" +
+            "#                  #" +
+            "#                  #" +
+            "#                  #" +
+            "#                  #" +
+            "#                  #" +
+            "#                  #" +
+            "#                  #" +
+            "#                  #" +
+            "#                  #" +
+            "#                  #" +
+            "#                  #" +
+            "#                  #" +
+            "#                  #" +
+            "#                  #" +
             "####################" ;
 
+    /**
+     * Constant for cell size
+     */
     private static final double CELL_SIZE = 4;
+    /**
+     * Constant for wall height
+     */
     private static final double WALL_HEIGHT = 4;
+    /**
+     * Constant for floor cell scale
+     */
     private static final double FLOOR_CELL_SCALE = 0.5;
-    private static final double MAX_DIST_EPSILON = 0.1;
+    /**
+     * Constant for the max distance below which positions are considered equal (used by the enemy)
+     */
+    private static final double MAX_DIST_EPSILON = 0.2;
 
+    /**
+     * The actual maze data
+     */
     private final CellType[] maze;
+    /**
+     * Path for the enemy texture
+     */
+    private final String[] enemyTexturePaths;
+    /**
+     * Enemy texture frame duration
+     */
+    private final double enemyTextureDuration;
+    /**
+     * Path for the coin texture
+     */
     private final String coinTexturePath;
-    private final String enemyTexturePath;
+    /**
+     * Path for the enemy sound
+     */
+    private final String enemySoundPath;
+    /**
+     * Path for the coin sound
+     */
+    private final String coinSoundPath;
+    /**
+     * Path for the death sound
+     */
+    private final String deathSoundPath;
+    /**
+     * Wall gameobjects
+     */
     private transient List<GameObject> walls;
+    /**
+     * Floor and ceiling gameobjects
+     */
     private transient List<GameObject> floorAndCeiling;
+    /**
+     * The list of coins in the maze
+     */
     private transient List<Coin> coins;
+    /**
+     * The player object
+     */
     private transient Player player;
+    /**
+     * The enemy object
+     */
     private transient Enemy enemy;
+    /**
+     * The coin count on the untouched maze
+     */
     private transient int maxCoinCount;
+    /**
+     * Time counter need for saving the time when the player wins
+     */
     private transient double time;
+    /**
+     * The target cell for the enemy
+     */
     private transient Cell enemyTargetCell;
 
+    /**
+     * The size of the loaded maze (the maze is a square)
+     */
     private final int MAZE_SIZE;
-    private Color wallColor = new Color(191, 172, 44);
-    private Color floorColor = new Color(77, 67, 23);
-    private Color ceilingColor = new Color(77, 67, 23);
+    /**
+     * The color of the wall
+     */
+    private Color wallColor;
+    /**
+     * The color of the floor
+     */
+    private Color floorColor;
+    /**
+     * The color of the ceiling
+     */
+    private Color ceilingColor;
 
-    public Maze(String mazeString, String coinTexturePath, String enemyTexturePath)
+    /**
+     * Creates a maze
+     * @param mazeString The maze data as a string
+     * @param wallColor The color of the walls
+     * @param floorColor The color of the floor
+     * @param ceilingColor The color of the ceiling
+     * @param enemyTexturePaths The path for the enemy texture
+     * @param enemyTextureDuration The duration of the enemy frames
+     * @param coinTexturePath The path for the coin texture
+     * @param enemySoundPath The path for the enemy sound
+     * @param coinSoundPath The path for the coin pickup sound
+     * @param deathSoundPath The path for the death sound
+     */
+    public Maze(String mazeString, Color wallColor, Color floorColor, Color ceilingColor, String[] enemyTexturePaths, double enemyTextureDuration, String coinTexturePath, String enemySoundPath, String coinSoundPath, String deathSoundPath)
     {
         MAZE_SIZE = (int)Math.sqrt(mazeString.length());
         maze = new CellType[MAZE_SIZE * MAZE_SIZE];
+        this.wallColor = wallColor;
+        this.floorColor = floorColor;
+        this.ceilingColor = ceilingColor;
+        this.enemyTexturePaths = enemyTexturePaths;
+        this.enemyTextureDuration = enemyTextureDuration;
         this.coinTexturePath = coinTexturePath;
-        this.enemyTexturePath = enemyTexturePath;
+        this.enemySoundPath = enemySoundPath;
+        this.coinSoundPath = coinSoundPath;
+        this.deathSoundPath = deathSoundPath;
 
         // if the maze is invalid, use the default maze
         if (mazeString.length() != MAZE_SIZE * MAZE_SIZE)
@@ -117,11 +222,19 @@ public class Maze implements Serializable
         build();
     }
 
+    /**
+     * Updates the maze (moves objects, checks collisions, win/lost etc.)
+     * @return Returns if the game should end (ESCAPE was pressed, name was not input after win etc.)
+     */
     public boolean update(double dt)
     {
         // go back to the main menu
         if (Input.isKeyPressed(KeyEvent.VK_ESCAPE))
+        {
+            AssetManager.getSound("_maze_enemySound").stop();
+            AssetManager.getSound("_maze_coinSound").stop();
             return false;
+        }
 
         // update gameobjects
         walls.forEach((var w) -> w.update(dt));
@@ -164,10 +277,16 @@ public class Maze implements Serializable
         {
             GameObject coin = c.getGameObject();
             coins.remove(coin);
+            Clip coinSound = AssetManager.getSound("_maze_coinSound");
+            coinSound.setMicrosecondPosition(0);
+            coinSound.start();
 
             // all coins have been collected
             if (coins.isEmpty())
             {
+                AssetManager.getSound("_maze_enemySound").stop();
+                AssetManager.getSound("_maze_coinSound").stop();
+
                 String input = JOptionPane.showInputDialog(
                         null,
                         "Enter your name:",
@@ -185,6 +304,33 @@ public class Maze implements Serializable
         // check player-enemy collision, and update enemy direction if 1 second has passed
         Cell enemyCell = pos2Cell(enemy.getPosition().xz());
         Cell playerCell = pos2Cell(player.getPosition().xz());
+
+        // check if enemy went into the wall (in case of low frame rate)
+        if (getCell(enemyCell.x, enemyCell.y) == CellType.WALL)
+        {
+            // reset enemy (put back to its start cell)
+            for (int i = 0; i < MAZE_SIZE; i++)
+            {
+                for (int j = 0; j < MAZE_SIZE; j++)
+                {
+                    if (getCell(j, i) == CellType.ENEMY)
+                    {
+                        enemy = new Enemy(new Vec3(
+                                -(MAZE_SIZE - 1) * CELL_SIZE / 2.0 + j * CELL_SIZE,
+                                WALL_HEIGHT * 3 / 8 + 0.1,
+                                -(MAZE_SIZE - 1) * CELL_SIZE / 2.0 + i * CELL_SIZE
+                        ), new Vec3(
+                                CELL_SIZE / 2.0, WALL_HEIGHT * 3 / 4, CELL_SIZE / 2.0
+                        ),
+                                "_maze_enemyTexture",
+                                4.0
+                        );
+                        enemyCell = pos2Cell(enemy.getPosition().xz());
+                    }
+                }
+            }
+        }
+        // check if player and enemy collided
         if (enemyCell.equals(playerCell))
             gameOver();
         // close enough to target cell, time to find the new target cell
@@ -212,8 +358,53 @@ public class Maze implements Serializable
                 enemy.setMoveDirection(Enemy.MoveDirection.LEFT);
         }
 
+        // play sound if enemy is in sight
+        int dx = enemyCell.x - playerCell.x;
+        int dy = enemyCell.y - playerCell.y;
+        Clip enemySound = AssetManager.getSound("_maze_enemySound");
+        // check if the sound is already playing and stop if the enemy is not in sight
+        if (dx != 0 && dy != 0)
+            enemySound.stop();
+        else if (!enemySound.isRunning() && (dx != 0 || dy != 0))
+        {
+            boolean inSight = true;
+
+            // same column
+            if (dx == 0)
+            {
+                int step = enemyCell.y > playerCell.y ? 1 : -1;
+                for (int y = playerCell.y; y != enemyCell.y; y += step)
+                {
+                    if (getCell(playerCell.x, y) == CellType.WALL)
+                    {
+                        inSight = false;
+                        break;
+                    }
+                }
+            }
+            // same row
+            else
+            {
+                int step = enemyCell.x > playerCell.x ? 1 : -1;
+                for (int x = playerCell.x; x != enemyCell.x; x += step)
+                {
+                    if (getCell(x, playerCell.y) == CellType.WALL)
+                    {
+                        inSight = false;
+                        break;
+                    }
+                }
+            }
+
+            if (inSight)
+            {
+                enemySound.setMicrosecondPosition(0);
+                enemySound.start();
+            }
+        }
+
         Renderer.addString(new RendererString(
-                String.format("Primes: %d/%d", maxCoinCount - coins.size(), maxCoinCount),
+                String.format("Coins: %d/%d", maxCoinCount - coins.size(), maxCoinCount),
                 Color.YELLOW,
                 false
         ));
@@ -221,6 +412,9 @@ public class Maze implements Serializable
         return true;
     }
 
+    /**
+     * Renders all the gameobjects of the maze
+     */
     public void render()
     {
         walls.forEach(Renderer::addGameObject);
@@ -230,6 +424,10 @@ public class Maze implements Serializable
         Renderer.addGameObject(enemy);
     }
 
+    /**
+     * Saves the maze to a file (.maze is the recommended extension)
+     * @param path Path for the output file
+     */
     public void saveToFile(String path)
     {
         try
@@ -248,6 +446,10 @@ public class Maze implements Serializable
         catch (IOException e) { e.printStackTrace(); }
     }
 
+    /**
+     * Loads a maze from file (.maze if the recommended extension)
+     * @param path The path for the maze file
+     */
     public static Maze loadFromFile(String path)
     {
         try
@@ -261,14 +463,23 @@ public class Maze implements Serializable
         } catch(Exception e) { e.printStackTrace(); return null; }
     }
 
-    public Player getPlayer() { return  player; }
+    /**
+     * Returns the player object
+     */
+    public Player getPlayer() { return player; }
 
+    /**
+     * Returns the type of the cell at a specific index
+     */
     public CellType getCell(int x, int y)
     {
         if (!Meth.isBetween(x, 0, MAZE_SIZE - 1) || !Meth.isBetween(y, 0, MAZE_SIZE - 1)) return CellType.EMPTY;
         else return maze[y * MAZE_SIZE + x];
     }
 
+    /**
+     * Sets the type of the cell at a specific index
+     */
     public void setCell(int x, int y, CellType type)
     {
         if (!Meth.isBetween(x, 0, MAZE_SIZE - 1) || !Meth.isBetween(y, 0, MAZE_SIZE - 1)) return;
@@ -277,18 +488,42 @@ public class Maze implements Serializable
         build();
     }
 
+    /**
+     * Returns the color of the wall
+     */
     public Color getWallColor() { return wallColor; }
+    /**
+     * Returns the color of the floor
+     */
     public Color getFloorColor() { return floorColor; }
+    /**
+     * Returns the color of the ceiling
+     */
     public Color getCeilingColor() { return ceilingColor; }
 
+    /**
+     * Sets the color of the wall
+     */
     public void setWallColor(Color color) { wallColor = color; }
+    /**
+     * Sets the color of the floor
+     */
     public void setFloorColor(Color color) { floorColor = color; }
+    /**
+     * Sets the color of the ceiling
+     */
     public void setCeilingColor(Color color) { ceilingColor = color; }
 
+    /**
+     * Builds the maze: creates the gameobjects based on the maze data and loads all the required resources
+     */
     public void build()
     {
-        AssetManager.loadTexture("_maze_coin", coinTexturePath);
-        AssetManager.loadTexture("_maze_enemy", enemyTexturePath);
+        AssetManager.loadTexture("_maze_enemyTexture", enemyTextureDuration, enemyTexturePaths);
+        AssetManager.loadTexture("_maze_coinTexture", coinTexturePath);
+        AssetManager.loadSound("_maze_enemySound", enemySoundPath);
+        AssetManager.loadSound("_maze_coinSound", coinSoundPath);
+        AssetManager.loadSound("_maze_deathSound", deathSoundPath);
 
         walls = new ArrayList<>();
         floorAndCeiling = new ArrayList<>();
@@ -343,7 +578,7 @@ public class Maze implements Serializable
                     ), new Vec3(
                             CELL_SIZE / 2.0, WALL_HEIGHT / 2.0, CELL_SIZE / 2.0
                     ), new Vec3(0.0, 0.0, -1.0),
-                            45.0
+                            GameScreen.FOV
                     );
                     player.setCollidable(true);
                 }
@@ -356,7 +591,7 @@ public class Maze implements Serializable
                     ), new Vec3(
                             CELL_SIZE / 4.0, CELL_SIZE / 4.0, CELL_SIZE / 4.0
                     ),
-                        "_maze_coin"
+                        "_maze_coinTexture"
                     );
                     coins.add(coin);
                 }
@@ -369,7 +604,7 @@ public class Maze implements Serializable
                     ), new Vec3(
                             CELL_SIZE / 2.0, WALL_HEIGHT * 3 / 4, CELL_SIZE / 2.0
                     ),
-                "_maze_enemy",
+                "_maze_enemyTexture",
                 4.0
                     );
                 }
@@ -379,16 +614,29 @@ public class Maze implements Serializable
         enemyTargetCell = pos2Cell(enemy.getPosition().xz());
     }
 
+    /**
+     * Game is over, play death sound and restart the game
+     */
     private void gameOver()
     {
+        AssetManager.getSound("_maze_enemySound").stop();
+        AssetManager.getSound("_maze_coinSound").stop();
+
+        Clip sound = AssetManager.getSound("_maze_deathSound");
+        sound.setMicrosecondPosition(0);
+        sound.start();
         build();
     }
 
+    /**
+     * Finds the shortest path in the maze between the start and the end cell using the BFS algorithm
+     * @return Returns the list of cells along the path (start and end cells included)
+     */
     private List<Cell> pathfindInMaze(Cell start, Cell end)
     {
         // source: chat gpt
 
-        if (!isCellValid(start) || !isCellValid(end))
+        if (!isCellValidAndNotWall(start) || !isCellValidAndNotWall(end))
             return Collections.emptyList();
 
         Queue<Cell> queue = new LinkedList<>();
@@ -417,7 +665,7 @@ public class Maze implements Serializable
                     default -> new Cell(-1, -1);
                 };
 
-                if (isCellValid(neighbor) && !visited.contains(neighbor))
+                if (isCellValidAndNotWall(neighbor) && !visited.contains(neighbor))
                 {
                     visited.add(neighbor);
                     parentMap.put(neighbor, current);
@@ -429,7 +677,10 @@ public class Maze implements Serializable
         return Collections.emptyList();
     }
 
-    private boolean isCellValid(Cell cell)
+    /**
+     * Returns if the cell is valid and not a wall
+     */
+    private boolean isCellValidAndNotWall(Cell cell)
     {
         if (cell.x < 0 || cell.x >= MAZE_SIZE || cell.y < 0 || cell.y >= MAZE_SIZE)
             return false;
@@ -438,6 +689,9 @@ public class Maze implements Serializable
         return maze[index] != CellType.WALL;
     }
 
+    /**
+     * Helper function to reconstruct a path used by the pathfind algorithm
+     */
     private List<Cell> reconstructPath(Cell end, Map<Cell, Cell> parentMap)
     {
         List<Cell> path = new LinkedList<>();
@@ -447,6 +701,10 @@ public class Maze implements Serializable
         return path;
     }
 
+    /**
+     * Converts a cell to a position
+     * @return The center of the cell in world space
+     */
     private Vec2 cell2Pos(Cell cell)
     {
         return new Vec2(
@@ -455,6 +713,9 @@ public class Maze implements Serializable
         );
     }
 
+    /**
+     * Returns the cell in the maze the given position corresponds to (might be invalid if it is outside of the maze
+     */
     private Cell pos2Cell(Vec2 pos)
     {
         return new Cell(

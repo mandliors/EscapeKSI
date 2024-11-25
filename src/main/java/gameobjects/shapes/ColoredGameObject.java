@@ -13,9 +13,18 @@ import main.java.rendering.*;
 
 public abstract class ColoredGameObject extends GameObject
 {
+    /**
+     * The vertices of the gameobject (will have to be set by the derived classes)
+     */
     protected double[] vertices;
+    /**
+     * The color of the gameobject
+     */
     protected Color color;
 
+    /**
+     * Creates a colored gameobject with a given position, scale, rotation and color
+     */
     public ColoredGameObject(Vec3 position, Vec3 scale, Vec3 rotation, Color color)
     {
         translate(position);
@@ -26,10 +35,21 @@ public abstract class ColoredGameObject extends GameObject
         this.color = color;
     }
 
+    /**
+     * Returns the color of the gameobject
+     */
     public Color getColor() { return color; }
+    /**
+     * Sets the color of the gameobject
+     */
     public void setColor(Color color) { this.color = color; }
 
     public void update(double dt) { }
+
+    /**
+     * Default rendering algorithm for gameobjects (draws all triangles seperately)
+     * @param camera From what pov the gameobject will be rendered
+     */
     public void render(Camera camera)
     {
         Mat4 viewProj = camera.getProjectionMatrix().multiply(camera.getViewMatrix());
@@ -70,6 +90,10 @@ public abstract class ColoredGameObject extends GameObject
         }
     }
 
+    /**
+     * Performs an approximate conversion on a color from scaled format to linear format
+     * @return The resulting color of the conversion
+     */
     public static Color getShade(Color color, double shade)
     {
         //source: https://www.alibabacloud.com/blog/construct-a-simple-3d-rendering-engine-with-java_599599

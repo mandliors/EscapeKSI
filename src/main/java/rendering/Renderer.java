@@ -14,26 +14,61 @@ import java.util.List;
 
 public class Renderer
 {
-    // target canvas for the main.java.rendering
+    /**
+     * Target canvas for the rendering
+     */
     private static Canvas canvas;
+    /**
+     * Gameobjects that will be rendered in the next frame
+     */
     private static List<GameObject> gameObjects;
 
+    /**
+     * Whether backface culling is enabled
+     */
     private static boolean backfaceCulling = true;
+    /**
+     * Whether wireframe mode is enabled
+     */
     private static boolean wireframe = false;
 
-    // strings to render
+    /**
+     * The font used for the renderer strings
+     */
     private static final Font bigFont = new Font(Font.MONOSPACED, Font.BOLD, 40);
+    /**
+     * Strings that will be rendered
+     */
     private static List<RendererString> rendererStrings;
 
-    // framebuffer for the textures
-    private static double resolution = 1.0;
+    /**
+     * Framebuffer data
+     */
     private static BufferedImage framebuffer;
+    /**
+     * Framebuffer resolution (between 0 and 1)
+     */
+    private static double resolution = 1.0;
+    /**
+     * Graphics object to render to the framebuffer
+     */
     private static Graphics2D fbG2d;
+    /**
+     * Pixel data of the framebuffer
+     */
     private static int[] fbPixels;
 
-    // data for the objects
+    /**
+     * Vertex data for plains
+     */
     public static double[] PlainVertices;
+    /**
+     * Vertex data for cubes
+     */
     public static double[] CubeVertices;
+    /**
+     * Vertex data for tetrahedrons
+     */
     public static double[] TetrahedronVertices;
 
     static {
@@ -117,23 +152,52 @@ public class Renderer
         };
     }
 
-    // res has to be between 0 and 1
+    /**
+     * Sets the resolution of the framebuffer
+     * @param res Resolution (has to be between 0 and 1)
+     */
     public static void setResolution(double res)
     {
         resolution = Math.clamp(res, 0.01, 1.0);
         updateFramebuffer();
     }
+
+    /**
+     * Returns the resolution of the framebuffer
+     */
     public static double getResolution() { return resolution; }
 
+    /**
+     * Returns the width of the canvas
+     */
     public static int getWidth() { return canvas.getWidth(); }
+    /**
+     * Returns the height of the canvas
+     */
     public static int getHeight() { return canvas.getHeight(); }
 
+    /**
+     * Sets backface-culling
+     */
     public static void setBackfaceCulling(boolean value) { backfaceCulling = value; }
+    /**
+     * Returns whether backface-culling is enabled
+     */
     public static boolean isBackfaceCullingEnabled() { return backfaceCulling; }
 
+    /**
+     * Sets wireframe mode
+     */
     public static void setWireframe(boolean value) { wireframe = value; }
+    /**
+     * Returns whether wireframe mode is enabled
+     */
     public static boolean isWireframeEnabled() { return wireframe; }
 
+    /**
+     * Initializes the renderer
+     * @param canvas The double-buffered canvas where the rendering happens
+     */
     public static void init(Canvas canvas)
     {
         Renderer.canvas = canvas;
@@ -152,10 +216,20 @@ public class Renderer
         updateFramebuffer();
     }
 
+    /**
+     * Submits a gameobject for rendering
+     */
     public static void addGameObject(GameObject gameObject) { gameObjects.add(gameObject); }
+    /**
+     * Removes a gameobject from rendering
+     */
     public static void removeGameObject(GameObject gameObject) { gameObjects.remove(gameObject); }
-    public static void clearGameObjects() { gameObjects.clear(); }
 
+    /**
+     * Renders all the submitted gameobjects
+     * @param g2d Graphics object used for rendering
+     * @param camera The camera's point of view
+     */
     public static void render(Graphics2D g2d, Camera camera)
     {
         fbG2d = framebuffer.createGraphics();
@@ -201,6 +275,11 @@ public class Renderer
         gameObjects.clear();
     }
 
+    /**
+     * Renders a colored triangle if it should not be clipped
+     * @param trigon The vertices
+     * @param color The color
+     */
     public static void drawTriangle(Vec3[] trigon, Color color)
     {
         if (!Meth.isBetween(trigon[0].getZ(), -1.0, 1.0) ||
@@ -211,6 +290,12 @@ public class Renderer
         _drawTriangleImpl(trigon, color);
     }
 
+    /**
+     * Renders a colored quad
+     * @param trigon1 The vertices for the first triangle
+     * @param trigon2 The vertices for the second triangle
+     * @param color
+     */
     public static void drawQuad(Vec3[] trigon1, Vec3[] trigon2, Color color)
     {
         if (!Meth.isBetween(trigon1[0].getZ(), -1.0, 1.0) ||
@@ -227,6 +312,13 @@ public class Renderer
         _drawTriangleImpl(trigon2, color);
     }
 
+    /**
+     * Renders a textured triangle
+     * @param texture The texture to be rendered
+     * @param trigon The vertices of the triangle
+     * @param u X coordinates inside the texture
+     * @param v Y coordinates inside the texture
+     */
     public static void drawTexturedTriangle(BufferedImage texture, Vec3[] trigon, double[] u, double[] v)
     {
         // discard clipped vertices (triangles)
@@ -238,8 +330,14 @@ public class Renderer
         _drawTexturedTriangleImpl(texture, trigon, u, v);
     }
 
+    /**
+     * Adds a string to the renderer strings
+     */
     public static void addString(RendererString string) { rendererStrings.add(string); }
 
+    /**
+     * Implementation of the colored triangle rendering
+     */
     public static void _drawTriangleImpl(Vec3[] trigon, Color color)
     {
         // clip->screen
@@ -255,6 +353,11 @@ public class Renderer
             fbG2d.fillPolygon(xCoords, yCoords, 3);
     }
 
+    /**
+     * Implementation of the textured triangle rendering
+     * Splits the triangle into two triangles and draws them pixel column by pixel column
+     * The pixels along the columns are interpolated, and are assigned to the appropriate pixel in the framebuffer data
+     */
     public static void _drawTexturedTriangleImpl(BufferedImage texture, Vec3[] trigon, double[] u, double[] v)
     {
         double scaleH = Renderer.getWidth() / 2.0;
@@ -383,6 +486,9 @@ public class Renderer
         }
     }
 
+    /**
+     * Interpolates the given x and y coordinates of a triangle on a texture
+     */
     private static double[] interpolateUV(int x, int y, int[] xPoints, int[] yPoints, double[] u, double[] v)
     {
         //source: chatgpt
@@ -403,6 +509,9 @@ public class Renderer
         return new double[] { uInterp, vInterp };
     }
 
+    /**
+     * Resizes the framebuffer if needed and updates the framebuffer data
+     */
     private static void updateFramebuffer()
     {
         // if the Rendering.main.java.rendering.Renderer has not yet been initialized

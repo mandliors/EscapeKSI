@@ -5,19 +5,51 @@ import main.java.meth.Vec3;
 
 public class Collision
 {
+    /**
+     * The collidable gameobject of the collision
+     */
     private final GameObject collidableGameObject;
+    /**
+     * The non-collidable gameobject of the collision
+     */
     private final GameObject gameObject;
+    /**
+     * The displacement of the collision
+     */
     private final Vec3 displacement;
 
+    /**
+     * The padding that every gameobject's collider has
+     */
     private static double colliderPadding = 0.1;
 
+    /**
+     * Returns the collidable gameobject of the collision
+     */
     public GameObject getCollidableGameObject() { return collidableGameObject; }
+    /**
+     * Returns the non-collidable gameobject of the collision
+     */
     public GameObject getGameObject() { return gameObject; }
+    /**
+     * Returns the displacement of the collision
+     */
     public Vec3 getDisplacement() { return displacement; }
 
+    /**
+     * Sets the collider padding for the gameobjects
+     */
     public static void setColliderPadding(double padding) { colliderPadding = padding; }
+
+    /**
+     * Returns the collider padding for the gameobjects
+     */
     public static double getColliderPadding() { return colliderPadding; }
 
+    /**
+     * Creates a collision between a collidable gameobject and a non-collidable gameobject
+     * Also calculates the displacement, which the collidable gameobject should be translated with
+     */
     public Collision(GameObject collidableGameObject, GameObject gameObject)
     {
         this.collidableGameObject = collidableGameObject;
@@ -25,6 +57,10 @@ public class Collision
         this.displacement = calculateDisplacementFromGameObjects(collidableGameObject, gameObject);
     }
 
+    /**
+     * Checks an AABB collision between the gameobjects and returns if they collide
+     * Does not take the rotations into consideration
+     */
     public static boolean collideWith(GameObject go1, GameObject go2)
     {
         Vec3 go1Scale = go1.getScale().add(new Vec3(colliderPadding * 2.0));
@@ -42,6 +78,12 @@ public class Collision
         return true;
     }
 
+    /**
+     * Calculates the displacement along all three axis and only keeps the smallest displacement
+     * @param cgo The collidable gameobject
+     * @param go The non-collidable gameobject
+     * @return Returns a vec3 with only one non-zero component (the smallest displacement which should be the translation)
+     */
     private static Vec3 calculateDisplacementFromGameObjects(GameObject cgo, GameObject go)
     {
         Vec3 centerToCenter = cgo.getPosition().subtract(go.getPosition());

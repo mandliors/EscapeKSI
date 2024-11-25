@@ -11,16 +11,28 @@ import java.awt.*;
 
 public class ColoredPlain extends ColoredGameObject
 {
+    /**
+     * Creates a white unit-sized plain in the origin
+     */
     public ColoredPlain()
     {
         this(new Vec3(0.0), new Vec3(1.0), new Vec3(0.0), Color.WHITE);
     }
+
+    /**
+     * Creates a plain with a given position, scale, rotation and color
+     */
     public ColoredPlain(Vec3 position, Vec3 scale, Vec3 rotation, Color color)
     {
         super(position, scale, rotation, color);
         this.vertices = Renderer.PlainVertices;
     }
 
+    /**
+     * Renders the plain from the camera's point of view (faces are rendered in one call, not using the default algorithm where they would be split up into two triangles)
+     * This is important for shading
+     * @param camera From what pov the plain will be rendered
+     */
     public void render(Camera camera)
     {
         Mat4 viewProj = camera.getProjectionMatrix().multiply(camera.getViewMatrix());

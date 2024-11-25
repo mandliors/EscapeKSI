@@ -2,6 +2,12 @@ package main.java.meth;
 
 public class Meth
 {
+    /**
+     * Returns the scaled version of the given matrix
+     * @param mat The source matrix
+     * @param s The scalar
+     * @return The resulting matrix
+     */
     public static Mat4 scale(Mat4 mat, Vec3 s)
     {
         return mat.multiply(new Mat4(new double[] {
@@ -12,6 +18,12 @@ public class Meth
         }));
     }
 
+    /**
+     * Returns the rotated version of the given matrix along the X axis
+     * @param mat The source matrix
+     * @param angle The rotation angle
+     * @return The resulting matrix
+     */
     public static Mat4 rotateX(Mat4 mat, double angle)
     {
         angle = Math.toRadians(angle);
@@ -25,6 +37,12 @@ public class Meth
                 0.0, 0.0,  0.0, 1.0
         }));
     }
+    /**
+     * Returns the rotated version of the given matrix along the Y axis
+     * @param mat The source matrix
+     * @param angle The rotation angle
+     * @return The resulting matrix
+     */
     public static Mat4 rotateY(Mat4 mat, double angle)
     {
         angle = Math.toRadians(angle);
@@ -38,6 +56,12 @@ public class Meth
                  0.0, 0.0, 0.0, 1.0
         }));
     }
+    /**
+     * Returns the rotated version of the given matrix along the Z axis
+     * @param mat The source matrix
+     * @param angle The rotation angle
+     * @return The resulting matrix
+     */
     public static Mat4 rotateZ(Mat4 mat, double angle)
     {
         angle = Math.toRadians(angle);
@@ -52,6 +76,13 @@ public class Meth
         }));
     }
 
+    /**
+     * Returns the rotated version of the given matrix along an arbitrary axis
+     * @param mat The source matrix
+     * @param axis The rotation axis
+     * @param angle The rotation angle
+     * @return The resulting matrix
+     */
     public static Mat4 rotate(Mat4 mat, Vec3 axis, double angle)
     {
         axis = axis.normalize();
@@ -68,6 +99,12 @@ public class Meth
         }));
     }
 
+    /**
+     * Returns the translated version of the given matrix
+     * @param mat The source matrix
+     * @param t The translation vector
+     * @return The resulting matrix
+     */
     public static Mat4 translate(Mat4 mat, Vec3 t)
     {
         return mat.multiply(new Mat4(new double[] {
@@ -78,6 +115,14 @@ public class Meth
         }));
     }
 
+    /**
+     * Creates a perspective projection matrix
+     * @param fovY Field of view
+     * @param aspect Aspect ratio
+     * @param near Near plain's distance
+     * @param far Far plain's distance
+     * @return The projection matrix
+     */
     public static Mat4 perspective(double fovY, double aspect, double near, double far)
     {
         double t = Math.tan(Math.toRadians(fovY / 2.0)) * near;
@@ -90,6 +135,17 @@ public class Meth
                 0.0,      0.0,      -1.0,                          0.0
         });
     }
+
+    /**
+     * Creates an orthographic projection matrix
+     * @param left Left plain's position
+     * @param right Right plain's position
+     * @param top Top plain's position
+     * @param bottom Bottom plain's position
+     * @param near Near plain's distance
+     * @param far Far plain's distance
+     * @return The projection matrix
+     */
     public static Mat4 orthographic(double left, double right, double top, double bottom, double near, double far)
     {
         return new Mat4(new double[] {
@@ -100,6 +156,13 @@ public class Meth
         });
     }
 
+    /**
+     * Calculates to world->view transformation matrix
+     * @param position The position of the viewer
+     * @param direction The facing direction of the viewer
+     * @param up The up direction of the viewer
+     * @return The transformation matrix
+     */
     public static Mat4 lookAt(Vec3 position, Vec3 direction, Vec3 up)
     {
         // calculate the view space basis vectors
@@ -127,7 +190,14 @@ public class Meth
         return worldToView;
     }
 
+    /**
+     * Returns if the value v is between min and max (int version)
+     */
     public static boolean isBetween(int v, int min, int max) { return min <= v && v <= max; }
+
+    /**
+     * Returns if the value v is between min and max (double version)
+     */
     public static boolean isBetween(double v, double min, double max)
     {
         return min <= v && v <= max;

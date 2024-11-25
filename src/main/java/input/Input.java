@@ -9,12 +9,27 @@ import java.util.Arrays;
 
 public class Input
 {
+    /**
+     * The keyboard state from the previous frame
+     */
     private static final boolean[] previousKeyboardState = new boolean[KeyEvent.KEY_LAST + 1];
+    /**
+     * The mouse button state from the previous frame
+     */
     private static final boolean[] previousMouseButtonState = new boolean[MouseEvent.BUTTON3 + 1];
+    /**
+     * The keyboard state in the current frame
+     */
     private static final boolean[] keyboardState = new boolean[KeyEvent.KEY_LAST + 1];
+    /**
+     * The mouse button state in the current frame
+     */
     private static final boolean[] mouseButtonState = new boolean[MouseEvent.BUTTON3 + 1];
 
-    public static void init(JFrame frame) throws NullPointerException
+    /**
+     * Initializes the keyboard and mouse button states
+     */
+    public static void init(JFrame frame)
     {
         Arrays.fill(previousKeyboardState, false);
         Arrays.fill(previousMouseButtonState, false);
@@ -36,6 +51,9 @@ public class Input
         });
     }
 
+    /**
+     * Invalidates the keyboard and mouse button states (previous state becomes the current state)
+     */
     public static void update()
     {
         // save the states
@@ -43,15 +61,30 @@ public class Input
         System.arraycopy(mouseButtonState, 0, previousMouseButtonState, 0, mouseButtonState.length);
     }
 
-    // was it just pressed?
+    /**
+     * Returns if the key has just been pressed
+     */
     public static boolean isKeyPressed(int key) { return keyboardState[key] && !previousKeyboardState[key]; }
+    /**
+     * Returns if the mouse button has just been pressed
+     */
     public static boolean isMouseButtonPressed(int button) { return button < mouseButtonState.length && mouseButtonState[button] && !previousMouseButtonState[button]; }
 
-    // was it just released?
+    /**
+     * Returns if the key has just been released
+     */
     public static boolean isKeyReleased(int key) { return !keyboardState[key] && previousKeyboardState[key]; }
+    /**
+     * Returns if the mouse button has just been released
+     */
     public static boolean isMouseButtonReleased(int button) { return button < mouseButtonState.length && !mouseButtonState[button] && previousMouseButtonState[button]; }
 
-    // is it being held?
+    /**
+     * Returns if the key is being pressed
+     */
     public static boolean isKeyDown(int key) { return keyboardState[key]; }
+    /**
+     * Returns if the mouse button is being pressed
+     */
     public static boolean isMouseButtonDown(int button) { return button < mouseButtonState.length && mouseButtonState[button]; }
 }

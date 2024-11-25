@@ -6,17 +6,32 @@ import main.java.meth.Vec3;
 
 public class Enemy extends TexturedPlain
 {
+    /**
+     * The directions in which the enemy can move
+     */
     public enum MoveDirection { NONE, UP, RIGHT, DOWN, LEFT }
 
+    /**
+     * Current move direction
+     */
     private MoveDirection moveDirection = MoveDirection.NONE;
+    /**
+     * The move speed of the player
+     */
     private final double moveSpeed;
 
+    /**
+     * Constructs an enemy with the given position, scale, texture name and move speed
+     */
     public Enemy(Vec3 position, Vec3 scale, String textureName, double moveSpeed)
     {
         super(position, scale, new Vec3(90.0, 0.0, 0.0), textureName);
         this.moveSpeed = moveSpeed;
     }
 
+    /**
+     * Sets the move direction and rotates accordingly so that the enemy is moved in the right direction and looks correct
+     */
     public void setMoveDirection(MoveDirection moveDirection)
     {
         this.moveDirection = moveDirection;
@@ -32,8 +47,15 @@ public class Enemy extends TexturedPlain
                 break;
         }
     }
+
+    /**
+     * Returns in which direction the enemy is moving
+     */
     public MoveDirection getMoveDirection() { return moveDirection; }
 
+    /**
+     * Moves the player in the previously set direction
+     */
     public void update(double dt)
     {
         switch (moveDirection)

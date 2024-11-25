@@ -3,6 +3,7 @@ package main.java;
 import main.java.leaderboard.Leaderboard;
 import main.java.screens.GameScreen;
 import main.java.screens.LeaderboardScreen;
+import main.java.screens.SettingsScreen;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,14 +11,32 @@ import java.awt.event.*;
 
 public class App extends JFrame
 {
-    enum GameState { MAIN_MENU, GAME, LEADERBOARD }
+    /**
+     * The states the application can have
+     */
+    enum GameState { MAIN_MENU, GAME, LEADERBOARD, SETTINGS }
 
+    /**
+     * The width of the screen
+     */
     private static final int WIDTH = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
+    /**
+     * The height of the screen
+     */
     private static final int HEIGHT = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
 
-    GameState gameState;
-    JPanel mainPanel;
+    /**
+     * The current game state
+     */
+    private GameState gameState;
+    /**
+     * The panel for the main menu
+     */
+    private JPanel mainPanel;
 
+    /**
+     * Construct the application, sets up the main menu
+     */
     public App()
     {
         super("Escape KSI");
@@ -45,12 +64,14 @@ public class App extends JFrame
 
         // create buttons
         JButton gameButton = createDarkButton("Start Game");
-        JButton leaderboard = createDarkButton("Leaderboard");
+        JButton leaderboardButton = createDarkButton("Leaderboard");
+        JButton settingsButton = createDarkButton("Settings");
         JButton exitButton = createDarkButton("Exit");
 
         // add action listeners
         gameButton.addActionListener(e -> gameState = GameState.GAME );
-        leaderboard.addActionListener(e -> gameState = GameState.LEADERBOARD );
+        leaderboardButton.addActionListener(e -> gameState = GameState.LEADERBOARD );
+        settingsButton.addActionListener(e -> gameState = GameState.SETTINGS );
         exitButton.addActionListener(e -> dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING)));
 
         // add buttons to the panel with spacing
@@ -58,7 +79,9 @@ public class App extends JFrame
         mainPanel.add(Box.createVerticalGlue());
         mainPanel.add(gameButton);
         mainPanel.add(Box.createRigidArea(spacing));
-        mainPanel.add(leaderboard);
+        mainPanel.add(leaderboardButton);
+        mainPanel.add(Box.createRigidArea(spacing));
+        mainPanel.add(settingsButton);
         mainPanel.add(Box.createRigidArea(spacing));
         mainPanel.add(exitButton);
         mainPanel.add(Box.createVerticalGlue());
@@ -71,6 +94,9 @@ public class App extends JFrame
         display();
     }
 
+    /**
+     * Start the main loop of the main menu panel, checks if state has changed and act accordingly
+     */
     public void display()
     {
         while (true)
@@ -90,10 +116,18 @@ public class App extends JFrame
                     leaderboardScreen.display();
                     backToMainMenu();
                 }
+                case SETTINGS -> {
+                    SettingsScreen settingsScreen = new SettingsScreen(this, WIDTH, HEIGHT);
+                    settingsScreen.display();
+                    backToMainMenu();
+                }
             }
         }
     }
 
+    /**
+     * Sets the state and panel back to main menu
+     */
     private void backToMainMenu()
     {
         gameState = GameState.MAIN_MENU;
@@ -102,6 +136,9 @@ public class App extends JFrame
         repaint();
     }
 
+    /**
+     * Returns a nice and dark button with the given text
+     */
     private JButton createDarkButton(String text)
     {
         JButton button = new JButton(text);
@@ -120,6 +157,9 @@ public class App extends JFrame
         return button;
     }
 
+    /**
+     * Entry point of the application
+     */
     public static void main(String[] args)
     {
         new App();
