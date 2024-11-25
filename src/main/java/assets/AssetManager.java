@@ -3,6 +3,7 @@ package main.java.assets;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
 import java.io.File;
 import java.util.HashMap;
 
@@ -68,11 +69,16 @@ public class AssetManager
     {
         try
         {
-            Clip clip = AudioSystem.getClip();
+            Clip clip = AudioSystem.getClip(AudioSystem.getMixer(null).getMixerInfo());
             AudioInputStream ais = AudioSystem.getAudioInputStream(new File(path));
             clip.open(ais);
             sounds.put(name, clip);
             return clip;
+        }
+        catch (LineUnavailableException lue)
+        {
+            System.out.println(lue.getMessage());
+            return null;
         }
         catch (Exception e)
         {

@@ -77,7 +77,7 @@ public class SettingsScreen extends JPanel
         panel.add(mouseSensLabel);
 
         // add a slider
-        JSlider mouseSensSlider = new JSlider(1, 100, (int)(GameScreen.mouseSensitivity * 100));
+        JSlider mouseSensSlider = new JSlider(1, 40, (int)(GameScreen.mouseSensitivity * 10));
         mouseSensSlider.setBackground(new Color(40, 40, 40));
         mouseSensSlider.setForeground(new Color(220, 220, 220));
         mouseSensSlider.setMajorTickSpacing(1);
@@ -85,7 +85,7 @@ public class SettingsScreen extends JPanel
         mouseSensSlider.setPaintLabels(false);
         mouseSensSlider.setFocusable(false);
         mouseSensSlider.addChangeListener(e -> {
-            GameScreen.mouseSensitivity = mouseSensSlider.getValue() / 100.0;
+            GameScreen.mouseSensitivity = mouseSensSlider.getValue() / 10.0;
         });
         panel.add(mouseSensSlider);
 

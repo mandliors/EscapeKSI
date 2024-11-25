@@ -9,6 +9,7 @@ import main.java.rendering.RendererString;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
 
 public class GameScreen extends JPanel
 {
@@ -23,7 +24,7 @@ public class GameScreen extends JPanel
     /**
      * Mouse sensitivity for the camera
      */
-    public static double mouseSensitivity = 0.06;
+    public static double mouseSensitivity = 1.0;
 
     /**
      * Maximum FPS
@@ -50,6 +51,14 @@ public class GameScreen extends JPanel
      * Whether the game is active
      */
     private boolean playing;
+    /**
+     * Blank cursor (used to hide the cursor while playing)
+     */
+    private static Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(
+            new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB),
+            new Point(0, 0),
+            "blank cursor"
+    );
 
     /**
      * Creates a new game panel on the parent frame with the given dimensions
@@ -121,6 +130,8 @@ public class GameScreen extends JPanel
         //maze.saveToFile("res/mazes/" + selectedMaze + "/" + selectedMaze + ".maze");
         maze = Maze.loadFromFile("res/mazes/" + selectedMaze + "/" + selectedMaze + ".maze");
 
+        setCursor(blankCursor);
+
         playing = true;
     }
 
@@ -143,6 +154,7 @@ public class GameScreen extends JPanel
                 dt = FRAME_TIME;
             }
         }
+        setCursor(Cursor.getDefaultCursor());
     }
 
     /**
