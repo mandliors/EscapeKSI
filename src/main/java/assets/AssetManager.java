@@ -1,9 +1,9 @@
 package main.java.assets;
 
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.LineUnavailableException;
+import com.sun.source.doctree.EscapeTree;
+
+import javax.sound.sampled.*;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.HashMap;
 
@@ -29,6 +29,24 @@ public class AssetManager
     {
         animationTime = 0.0;
         textures.put("placeholder", new Texture());
+
+        try
+        {
+            float sampleRate = 44100;
+
+            AudioFormat format = new AudioFormat(sampleRate, 16, 1, true, false);
+            byte[] silence = new byte[(int) sampleRate * 2]; // 2 bytes per sample for 16-bit audio
+
+            // create a data stream from the silence array
+            AudioInputStream audioInputStream = new AudioInputStream(new ByteArrayInputStream(silence), format, (int) sampleRate);
+
+            DataLine.Info info = new DataLine.Info(Clip.class, format);
+            Clip clip = (Clip) AudioSystem.getLine(info);
+            clip.open(audioInputStream);
+
+            sounds.put("placeholder", clip);
+        }
+        catch (Exception e) { e.printStackTrace(); }
     }
 
     /**
@@ -75,11 +93,6 @@ public class AssetManager
             sounds.put(name, clip);
             return clip;
         }
-        catch (LineUnavailableException lue)
-        {
-            System.out.println(lue.getMessage());
-            return null;
-        }
         catch (Exception e)
         {
             e.printStackTrace();
@@ -101,5 +114,10 @@ public class AssetManager
     /**
      * Returns the sound by its name
      */
-    public static Clip getSound(String name) { return sounds.get(name); }
+    public static Clip getSound(String name)
+    {
+        Clip c = sounds.get(name);
+        if (c != null) return c;
+        else return sounds.get("placeholder");
+    }
 }

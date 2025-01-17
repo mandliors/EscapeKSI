@@ -8,9 +8,18 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class Vec4Test
 {
+    /**
+     * Error margin for double comparison
+     */
     static final double ERROR_MARGIN = 1e-8;
+    /**
+     * Two vectors for the tests
+     */
     static Vec3 a, b;
 
+    /**
+     * Setups, runs once before the tests
+     */
     @BeforeAll
     static void setUp()
     {
@@ -18,6 +27,9 @@ class Vec4Test
         b = new Vec3(0.0, -2.0, 7.0);
     }
 
+    /**
+     * Function that tests vector addition
+     */
     @Test
     void testAdd()
     {
@@ -28,18 +40,27 @@ class Vec4Test
         assertEquals(12.0, sum.getZ(), ERROR_MARGIN);
     }
 
+    /**
+     * Function that tests vector dot product
+     */
     @Test
     void testDot()
     {
         assertEquals(43.0, a.dot(b), ERROR_MARGIN);
     }
 
+    /**
+     * Function that test vector length function
+     */
     @Test
     void testGetLength()
     {
         assertEquals(Math.sqrt(50), a.getLength(), ERROR_MARGIN);
     }
 
+    /**
+     * Function that tests the normalize function
+     */
     @Test
     void testNormalize()
     {

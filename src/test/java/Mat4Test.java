@@ -9,11 +9,26 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class Mat4Test
 {
+    /**
+     * Error margin for double comparison
+     */
     static final double ERROR_MARGIN = 1e-8;
+    /**
+     * Identity matrix, needed for the tests
+     */
     static Mat4 identity;
+    /**
+     * A matrix for the tests
+     */
     static Mat4 mat;
+    /**
+     * A vector for the tests
+     */
     static Vec4 vec;
 
+    /**
+     * Function that sets up the data for the tests
+     */
     @BeforeAll
     static void setUp()
     {
@@ -29,6 +44,9 @@ class Mat4Test
         vec = new Vec4(0.0, 1.0, 0.0, -1.0);
     }
 
+    /**
+     * Tests the one value constructor of the matrix
+     */
     @Test
     void oneValueConstructorTest()
     {
@@ -42,6 +60,9 @@ class Mat4Test
         }
     }
 
+    /**
+     * Tests the addition function on matrices
+     */
     @Test
     void addTest()
     {
@@ -51,6 +72,9 @@ class Mat4Test
                 assertEquals(mat.get(i, j) + identity.get(i, j), sum.get(i, j), ERROR_MARGIN);
     }
 
+    /**
+     * Tests the multiplication on 2 matrices (mat * identity)
+     */
     @Test
     void multiplyWithMatrixTest()
     {
@@ -60,6 +84,9 @@ class Mat4Test
                 assertEquals(mat.get(i, j), product.get(i, j), ERROR_MARGIN);
     }
 
+    /**
+     * Tests the matrix * vector function
+     */
     @Test
     void multiplyWithVec4Test()
     {

@@ -18,7 +18,7 @@ public class Player extends ColoredCube
     {
         super(position, scale, new Vec3(0.0), new Color(0));
 
-        camera = new Camera(fov, GameScreen.mouseSensitivity, 0.01, 200.0);
+        camera = new Camera(fov, GameScreen.mouseSensitivity, 0.01, 50.0);
         camera.setPosition(position);
         camera.lookAt(position.add(lookDirection));
         camera.setMouseLock(true);

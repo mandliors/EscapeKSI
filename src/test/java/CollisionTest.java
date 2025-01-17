@@ -12,10 +12,22 @@ import java.awt.*;
 
 class CollisionTest
 {
+    /**
+     * Error margin for double comparison
+     */
     static final double ERROR_MARGIN = 1e-8;
+    /**
+     * A cube for the tests
+     */
     ColoredCube cube1;
+    /**
+     * Another cube for the tests
+     */
     ColoredCube cube2;
 
+    /**
+     * Setup that runs before each test
+     */
     @BeforeEach
     void setUp()
     {
@@ -23,12 +35,18 @@ class CollisionTest
         cube2 = new ColoredCube(new Vec3(1.8, 0.3, -1.0), new Vec3(2.0, 1.0, 1.0), new Vec3(0.0), Color.WHITE);
     }
 
+    /**
+     * Tests collision between two gameobjects (they do collide)
+     */
     @Test
     void testCollision()
     {
         assertTrue(Collision.collideWith(cube1, cube2));
     }
 
+    /**
+     * Tests collision between two gameobjects (they don't collide)
+     */
     @Test
     void testCollision2()
     {
@@ -36,6 +54,9 @@ class CollisionTest
         assertFalse(Collision.collideWith(cube1, cube2));
     }
 
+    /**
+     * Tests the function that calculates the displacement vector for a specific collision
+     */
     @Test
     void testCollisionDisplacement()
     {
