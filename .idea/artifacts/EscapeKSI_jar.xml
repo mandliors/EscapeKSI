@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="EscapeKSI:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/EscapeKSI_jar</output-path>
+    <root id="archive" name="EscapeKSI.jar">
+      <element id="module-output" name="EscapeKSI" />
+    </root>
+  </artifact>
+</component>
